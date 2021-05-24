@@ -23,6 +23,7 @@
                 <video id="pfic_ar" crossOrigin="anonymous" type="video/mp4" src="assets/PFIC_AR.mp4" autoplay loop="true" muted="true" webkit-playsinline playsinline/>
             </a-assets>
 
+            
             <a-marker
                 id="animated-marker"
                 type="pattern"
@@ -32,6 +33,10 @@
                 emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
                 id="markerA"
+                material="" 
+                arjs-anchor=""
+                arjs-hit-testing="" 
+                smooth="true"
             />
           
          <a-image src="assets/simon.JPG"
@@ -52,12 +57,16 @@
           rotation="-90 0 0" 
         ></a-image>            
             
+                
         <a-video src="#pfic_ar"
+           play-on-window-click
            width="1.6" 
            height=".9" 
            position="0 0 0"
            rotation="-90 0 0" 
            play="true"
+           material="" 
+           geometry=""
          ></a-video>
             
             
@@ -100,7 +109,6 @@
       }, false);
      
     </script> 
-    
     
     </body>
 </html>
