@@ -35,19 +35,19 @@
             />
           
          <a-image src="assets/simon.JPG"
-          position= "1 0 0"
+          position= "1.2 0 0"
           scale= "1 1 1"
           rotation="-90 0 0" 
         ></a-image>   
             
         <a-image src="assets/parker-logo.jpg"
-          position= "0 -1 0"
+          position= "1 0 1"
           scale= "1 1 1"
           rotation="-90 0 0" 
         ></a-image>
   
         <a-image src="assets/parker_2.jpg"
-          position= "1 1 0"
+          position= "-.5 0 -1"
           scale= "1 1 1"
           rotation="-90 0 0" 
         ></a-image>            
@@ -63,7 +63,7 @@
             
                 <a-entity
                     id="spinneret-stress"
-                    position= "1 1 0"
+                    position= "1 0 -1"
                     scale="0.1 0.1 0.1"
                     rotation="-60 0 0"
                     animation-mixer="loop: repeat"
@@ -74,7 +74,7 @@
             
                  <a-entity
                     id="Parker_filter_2"
-                    position= "1 1 0"
+                    position= "1 0 -.5"
                     scale="0.1 0.1 0.1"
                     rotation="-60 0 0"
                     animation-mixer="loop: repeat"
@@ -91,7 +91,7 @@
     
        <script>
       window.addEventListener('click', function () {
-        var video = document.querySelector("url(assets/PFIC_AR.mp4)");
+        var video = document.querySelector('#pfic_ar');
         if (video.paused == true) {
           video.play();
           } else {
