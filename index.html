@@ -109,6 +109,16 @@
             <a-entity camera></a-entity>
         </a-scene>
     
+    <script type="text/javascript">
+    $(function(){
+        function callback () {
+            document.querySelector('#pfic_ar').src = document.querySelector('#pfic_ar').src
+            document.querySelector('#pfic_ar').play();
+        }
+        window.addEventListener("load", callback, false);
+
+    });
+</script>
        <script>
       window.addEventListener('click', function () {
         var video = document.querySelector('#pfic_ar');
