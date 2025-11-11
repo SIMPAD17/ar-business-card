@@ -122,16 +122,16 @@
                     animation="property: opacity; to: 0.8; dur: 800; delay: 100"
                 ></a-image>
                 
-                <!-- VIDEO PLANE - Parallel to ground, 1 unit above site image -->
+                <!-- VIDEO PLANE - Flat on card like other images -->
                 <a-plane
-                    position="0 1.05 0"
+                    position="0 0.2 0"
                     rotation="-90 0 0"
                     width="1.8"
                     height="1"
                     material="src: #pfic_ar; shader: flat; side: double"
                     opacity="0"
                     animation="property: opacity; to: 1; dur: 800; delay: 500"
-                    animation__float="property: position; to: 0 1.1 0; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1300"
+                    animation__float="property: position; to: 0 0.25 0; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1300"
                 ></a-plane>
                 
                 <!-- Your Photo -->
@@ -263,11 +263,10 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- INFO PANEL - Rotated to face camera -->
+                <!-- INFO PANEL - Faces camera -->
                 <a-entity
                     id="info-panel"
                     position="0 0.8 -0.3"
-                    rotation="0 180 0"
                     visible="false"
                 >
                     <!-- Background -->
