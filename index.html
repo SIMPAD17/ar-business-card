@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <title>Simon's AR Business Card</title>
+        <title>Simon's AR Card</title>
         
         <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
         <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -13,502 +13,382 @@
         <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
         
         <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
             body {
                 margin: 0;
                 overflow: hidden;
-                font-family: 'Arial', sans-serif;
+                background: #000;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             }
             
-            /* Loading Screen */
-            #loading-screen {
+            /* Minimal loading indicator */
+            #loading {
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(135deg, #0a4c8a 0%, #1a73e8 100%);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #fff;
+                font-size: 14px;
                 z-index: 9999;
+                text-align: center;
+                pointer-events: none;
                 transition: opacity 0.5s;
             }
             
-            #loading-screen.hidden {
+            #loading.hidden {
                 opacity: 0;
-                pointer-events: none;
             }
             
-            .loader {
-                width: 60px;
-                height: 60px;
-                border: 6px solid rgba(255, 255, 255, 0.3);
-                border-top: 6px solid white;
+            .dot {
+                width: 8px;
+                height: 8px;
+                background: #fff;
                 border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin-bottom: 20px;
+                display: inline-block;
+                margin: 0 3px;
+                animation: pulse 1.4s infinite ease-in-out;
             }
             
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
+            .dot:nth-child(1) { animation-delay: -0.32s; }
+            .dot:nth-child(2) { animation-delay: -0.16s; }
+            
+            @keyframes pulse {
+                0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+                40% { opacity: 1; transform: scale(1); }
             }
             
-            #loading-screen h1 {
-                color: white;
-                font-size: 28px;
-                margin: 10px 0;
-                text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            }
-            
-            #loading-screen p {
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 16px;
-                text-align: center;
-                padding: 0 20px;
-            }
-            
-            /* Instructions Overlay */
-            #instructions {
+            /* Minimal status indicator */
+            #status {
                 position: fixed;
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.85);
-                color: white;
-                padding: 15px 25px;
-                border-radius: 12px;
-                font-size: 14px;
-                text-align: center;
-                z-index: 1000;
-                max-width: 90%;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                backdrop-filter: blur(10px);
-                transition: all 0.3s;
-                display: none;
-            }
-            
-            #instructions.found {
-                background: rgba(26, 115, 232, 0.9);
-                box-shadow: 0 4px 30px rgba(26, 115, 232, 0.5);
-            }
-            
-            /* Interactive Controls */
-            #controls {
-                position: fixed;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                gap: 12px;
-                z-index: 1000;
-                flex-wrap: wrap;
-                justify-content: center;
-                max-width: 90%;
-            }
-            
-            .control-btn {
-                background: linear-gradient(135deg, #0a4c8a 0%, #1a73e8 100%);
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 25px;
-                font-size: 13px;
-                font-weight: bold;
-                cursor: pointer;
-                box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4);
-                transition: all 0.3s;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            
-            .control-btn:active {
-                transform: scale(0.95);
-            }
-            
-            .control-btn.active {
-                background: linear-gradient(135deg, #ea4335 0%, #fbbc04 100%);
-                box-shadow: 0 4px 20px rgba(234, 67, 53, 0.5);
-            }
-            
-            /* Info Panel */
-            #info-panel {
-                position: fixed;
-                top: 80px;
-                right: -350px;
-                width: 320px;
-                background: rgba(255, 255, 255, 0.95);
-                border-radius: 15px 0 0 15px;
-                padding: 20px;
-                box-shadow: -4px 0 20px rgba(0,0,0,0.2);
-                z-index: 999;
-                transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                max-height: 70vh;
-                overflow-y: auto;
-                backdrop-filter: blur(10px);
-            }
-            
-            #info-panel.visible {
-                right: 0;
-            }
-            
-            #info-panel h2 {
-                color: #0a4c8a;
-                margin-top: 0;
-                font-size: 22px;
-                border-bottom: 2px solid #1a73e8;
-                padding-bottom: 10px;
-            }
-            
-            #info-panel .info-item {
-                margin: 15px 0;
-                padding: 10px;
-                background: rgba(26, 115, 232, 0.1);
-                border-radius: 8px;
-            }
-            
-            #info-panel .info-item strong {
-                color: #0a4c8a;
-                display: block;
-                margin-bottom: 5px;
-            }
-            
-            .close-btn {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: #ea4335;
-                color: white;
-                border: none;
-                width: 30px;
-                height: 30px;
-                border-radius: 50%;
-                cursor: pointer;
-                font-size: 18px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            /* Stats Display */
-            #stats-display {
-                position: fixed;
-                top: 80px;
-                left: 20px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 12px;
-                border-radius: 10px;
+                color: rgba(255, 255, 255, 0.6);
                 font-size: 12px;
-                z-index: 1000;
-                display: none;
+                padding: 8px 16px;
+                background: rgba(0, 0, 0, 0.6);
+                border-radius: 20px;
                 backdrop-filter: blur(10px);
-            }
-            
-            #stats-display.visible {
-                display: block;
-            }
-            
-            /* Floating Action Button */
-            .fab {
-                position: fixed;
-                bottom: 100px;
-                right: 20px;
-                width: 56px;
-                height: 56px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
-                color: white;
-                border: none;
-                font-size: 24px;
-                cursor: pointer;
-                box-shadow: 0 4px 20px rgba(52, 168, 83, 0.5);
-                transition: all 0.3s;
                 z-index: 1000;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                transition: all 0.3s;
             }
             
-            .fab:active {
-                transform: scale(0.9);
+            #status.detected {
+                color: rgba(255, 255, 255, 0.9);
+                background: rgba(0, 0, 0, 0.8);
             }
             
-            /* Animations */
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-            }
-            
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            /* Hidden by default */
+            .a-loader-title {
+                display: none !important;
             }
         </style>
     </head>
 
     <body>
-        <!-- Loading Screen -->
-        <div id="loading-screen">
-            <div class="loader"></div>
-            <h1>Simon's AR Business Card</h1>
-            <p id="loading-text">Loading experience...</p>
-            <button id="start-ar-btn" style="display: none; margin-top: 20px; padding: 15px 30px; font-size: 16px; background: white; color: #0a4c8a; border: none; border-radius: 25px; cursor: pointer; font-weight: bold;">Start AR Experience</button>
-        </div>
-        
-        <!-- Instructions -->
-        <div id="instructions">
-            📱 Point your camera at the business card marker
-        </div>
-        
-        <!-- Stats Display -->
-        <div id="stats-display">
-            <div>Marker: <span id="marker-status">Not Detected</span></div>
-            <div>Objects: <span id="object-count">0</span></div>
-            <div>FPS: <span id="fps-counter">--</span></div>
-        </div>
-        
-        <!-- Interactive Controls -->
-        <div id="controls">
-            <button class="control-btn" id="toggle-video">
-                <span>▶️</span> Toggle Video
-            </button>
-            <button class="control-btn" id="toggle-animations">
-                <span>✨</span> Toggle Animations
-            </button>
-            <button class="control-btn" id="show-info">
-                <span>ℹ️</span> Info
-            </button>
-            <button class="control-btn" id="toggle-particles">
-                <span>⭐</span> Particles
-            </button>
-            <button class="control-btn" id="toggle-stats">
-                <span>📊</span> Stats
-            </button>
-        </div>
-        
-        <!-- Info Panel -->
-        <div id="info-panel">
-            <button class="close-btn" id="close-info">×</button>
-            <h2>Simon @ Parker PFIC</h2>
-            <div class="info-item">
-                <strong>🔬 Expertise</strong>
-                Filtration Engineering, R&D, Product Design, Media Design, AI & Simulation
-            </div>
-            <div class="info-item">
-                <strong>💼 Role</strong>
-                Filtration Engineer at Parker Hannifin's Filtration Innovation Center
-            </div>
-            <div class="info-item">
-                <strong>🎓 Current</strong>
-                Ph.D. Student specializing in membrane science and hollow fiber polyimide membranes
-            </div>
-            <div class="info-item">
-                <strong>🔧 Specializations</strong>
-                • Nanofiber Production<br>
-                • CFD/FEA Simulation<br>
-                • VR Visualization<br>
-                • Advanced Analytics
-            </div>
-            <div class="info-item">
-                <strong>📱 Interact</strong>
-                • Pinch to zoom 3D models<br>
-                • Tap video to play/pause<br>
-                • Explore different angles
+        <!-- Minimal Loading -->
+        <div id="loading">
+            <div>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
             </div>
         </div>
         
-        <!-- FAB Button -->
-        <button class="fab" id="fab-btn" title="Quick Actions">💡</button>
+        <!-- Minimal Status -->
+        <div id="status">Point at marker</div>
 
-        <!-- A-Frame Scene -->
+        <!-- A-Frame AR Scene -->
         <a-scene
-            vr-mode-ui="enabled: false;"
-            loading-screen="enabled: false;"
-            renderer="logarithmicDepthBuffer: true; antialias: true; colorManagement: true;"
-            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-            id="scene"
+            vr-mode-ui="enabled: false"
+            loading-screen="enabled: false"
+            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+            renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true; precision: medium;"
             embedded
             gesture-detector
         >
             <a-assets>
-                <video id="pfic_ar" crossOrigin="anonymous" type="video/mp4" src="assets/PFIC_AR.mp4" autoplay loop="true" muted="true" webkit-playsinline playsinline/>
+                <video id="pfic_ar" crossOrigin="anonymous" type="video/mp4" src="assets/PFIC_AR.mp4" autoplay loop="true" muted="true" webkit-playsinline playsinline></video>
             </a-assets>
 
             <a-marker
-                id="animated-marker"
                 type="pattern"
                 preset="custom"
                 url="assets/marker.patt"
                 raycaster="objects: .clickable"
                 emitevents="true"
-                cursor="fuse: false; rayOrigin: mouse;"
-                material="" 
-                arjs-anchor=""
-                arjs-hit-testing="" 
+                cursor="fuse: false; rayOrigin: mouse"
                 smooth="true"
                 smoothCount="10"
                 smoothTolerance="0.01"
                 smoothThreshold="5"
             >
+                <!-- Lighting - Minimal, dramatic -->
+                <a-entity light="type: ambient; color: #fff; intensity: 0.6"></a-entity>
+                <a-entity light="type: directional; color: #fff; intensity: 0.8" position="2 4 2"></a-entity>
+                <a-entity light="type: point; color: #fff; intensity: 0.5" position="0 2 0"></a-entity>
                 
-                <!-- Enhanced Lighting System -->
-                <a-entity light="type: ambient; color: #ffffff; intensity: 0.7"></a-entity>
-                <a-entity light="type: directional; color: #ffffff; intensity: 0.8" position="2 4 1"></a-entity>
-                <a-entity light="type: point; color: #1a73e8; intensity: 0.5" position="0 2 0"
-                          animation="property: position; to: 0 2.5 0; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine"></a-entity>
+                <!-- Base plane (semi-transparent) -->
+                <a-plane
+                    position="0 0.01 0"
+                    rotation="-90 0 0"
+                    width="3.5"
+                    height="2.5"
+                    color="#000"
+                    opacity="0.15"
+                    material="transparent: true"
+                ></a-plane>
                 
-                <!-- Particle System (orbiting spheres) -->
-                <a-entity id="particle-system" position="0 0 0" visible="true">
-                    <!-- Orbiting particles -->
-                    <a-sphere class="particle" radius="0.03" color="#1a73e8" position="1.5 0.5 0"
-                             animation="property: object3D.rotation.y; to: 360; loop: true; dur: 4000; easing: linear"></a-sphere>
-                    <a-sphere class="particle" radius="0.03" color="#34a853" position="-1.5 0.5 0"
-                             animation="property: object3D.rotation.y; to: 360; loop: true; dur: 5000; easing: linear"></a-sphere>
-                    <a-sphere class="particle" radius="0.03" color="#fbbc04" position="0 0.5 1.5"
-                             animation="property: object3D.rotation.y; to: 360; loop: true; dur: 3500; easing: linear"></a-sphere>
-                    <a-sphere class="particle" radius="0.03" color="#ea4335" position="0 0.5 -1.5"
-                             animation="property: object3D.rotation.y; to: 360; loop: true; dur: 4500; easing: linear"></a-sphere>
-                    
-                    <!-- Floating particles -->
-                    <a-sphere class="particle" radius="0.02" color="#ffffff" position="0.8 1 0.8" opacity="0.6"
-                             animation="property: position; to: 0.8 1.8 0.8; dir: alternate; dur: 3000; loop: true; easing: easeInOutQuad"></a-sphere>
-                    <a-sphere class="particle" radius="0.02" color="#ffffff" position="-0.8 1 -0.8" opacity="0.6"
-                             animation="property: position; to: -0.8 1.8 -0.8; dir: alternate; dur: 2500; loop: true; easing: easeInOutQuad"></a-sphere>
-                </a-entity>
+                <!-- Minimalist corner markers -->
+                <a-box position="-1.5 0.02 -1" scale="0.08 0.01 0.08" color="#fff" opacity="0.8"></a-box>
+                <a-box position="1.5 0.02 -1" scale="0.08 0.01 0.08" color="#fff" opacity="0.8"></a-box>
+                <a-box position="-1.5 0.02 1" scale="0.08 0.01 0.08" color="#fff" opacity="0.8"></a-box>
+                <a-box position="1.5 0.02 1" scale="0.08 0.01 0.08" color="#fff" opacity="0.8"></a-box>
                 
-                <!-- Images with entrance animations -->
-                <a-image id="simon-photo" src="assets/simon.JPG"
-                    position="1.3 0 -.1"
-                    scale="0.01 0.01 0.01"
+                <!-- Images - Subtle elevation with shadows -->
+                <a-image 
+                    src="assets/simon.JPG"
+                    position="1.3 0.15 -.1"
+                    scale="0.70 0.70 0.70"
                     rotation="-90 0 0"
                     opacity="0"
-                    animation__enter="property: scale; to: 0.70 0.70 0.70; dur: 800; delay: 200; easing: easeOutBack"
-                    animation__fade="property: opacity; to: 1; dur: 600; delay: 200"
-                    animation__hover="property: scale; to: 0.75 0.75 0.75; dur: 300; startEvents: mouseenter"
-                    animation__hoverout="property: scale; to: 0.70 0.70 0.70; dur: 300; startEvents: mouseleave"
+                    animation="property: opacity; to: 1; dur: 600; delay: 200; easing: easeOutQuad"
+                    animation__float="property: position; to: 1.3 0.25 -.1; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 800"
                     class="clickable"
-                ></a-image>   
+                ></a-image>
                 
-                <a-image id="parker-logo" src="assets/parker-logo.jpg"
-                    position="-.42 0 -.62"
-                    scale="0.01 0.01 0.01"
+                <!-- Glow underneath photo -->
+                <a-circle
+                    position="1.3 0.02 -.1"
+                    rotation="-90 0 0"
+                    radius="0.4"
+                    color="#fff"
+                    opacity="0"
+                    animation="property: opacity; to: 0.2; dur: 600; delay: 200"
+                    animation__pulse="property: opacity; to: 0.35; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine; delay: 800"
+                ></a-circle>
+                
+                <a-image 
+                    src="assets/parker-logo.jpg"
+                    position="-.42 0.15 -.62"
+                    scale="0.75 0.25 0.25"
                     rotation="-90 0 0"
                     opacity="0"
-                    animation__enter="property: scale; to: 0.75 0.25 0.25; dur: 800; delay: 400; easing: easeOutBack"
-                    animation__fade="property: opacity; to: 1; dur: 600; delay: 400"
-                    animation__pulse="property: scale; to: 0.78 0.28 0.28; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine; delay: 1200"
+                    animation="property: opacity; to: 1; dur: 600; delay: 400; easing: easeOutQuad"
+                    animation__float="property: position; to: -.42 0.2 -.62; dir: alternate; dur: 2500; loop: true; easing: easeInOutSine; delay: 1000"
                 ></a-image>
         
-                <a-image id="parker-2" src="assets/parker_2.jpg"
-                    position="-.3 0 .75"
-                    scale="0.01 0.01 0.01"
+                <a-image 
+                    src="assets/parker_2.jpg"
+                    position="-.3 0.15 .75"
+                    scale="1 .5 .5"
                     rotation="-90 0 0"
                     opacity="0"
-                    animation__enter="property: scale; to: 1 .5 .5; dur: 800; delay: 600; easing: easeOutBack"
-                    animation__fade="property: opacity; to: 1; dur: 600; delay: 600"
-                ></a-image>            
+                    animation="property: opacity; to: 1; dur: 600; delay: 600; easing: easeOutQuad"
+                    animation__float="property: position; to: -.3 0.2 .75; dir: alternate; dur: 3500; loop: true; easing: easeInOutSine; delay: 1200"
+                ></a-image>
                 
-                <a-image id="pfic-name" src="assets/pfic-name.png"
-                    position="1 0 -.60"
-                    scale="0.01 0.01 0.01"
+                <a-image 
+                    src="assets/pfic-name.png"
+                    position="1 0.15 -.60"
+                    scale="2 .25 .25"
                     rotation="-90 0 0"
                     opacity="0"
-                    animation__enter="property: scale; to: 2 .25 .25; dur: 800; delay: 800; easing: easeOutBack"
-                    animation__fade="property: opacity; to: 1; dur: 600; delay: 800"
-                    animation__float="property: position; to: 1 0.05 -.60; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1600"
-                ></a-image> 
+                    animation="property: opacity; to: 1; dur: 600; delay: 800; easing: easeOutQuad"
+                    animation__float="property: position; to: 1 0.22 -.60; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1400"
+                ></a-image>
         
-                <a-image id="simon-name" src="assets/simon-name.png"
-                    position="1.32 0 .35"
-                    scale="0.01 0.01 0.01"
+                <a-image 
+                    src="assets/simon-name.png"
+                    position="1.32 0.15 .35"
+                    scale=".75 .18 .18"
                     rotation="-90 0 0"
                     opacity="0"
-                    animation__enter="property: scale; to: .75 .18 .18; dur: 800; delay: 1000; easing: easeOutBack"
-                    animation__fade="property: opacity; to: 1; dur: 600; delay: 1000"
-                ></a-image> 
+                    animation="property: opacity; to: 1; dur: 600; delay: 1000; easing: easeOutQuad"
+                    animation__float="property: position; to: 1.32 0.2 .35; dir: alternate; dur: 2800; loop: true; easing: easeInOutSine; delay: 1600"
+                ></a-image>
                 
-                <a-image id="pfic-site" src="assets/PFIC_SITE.JPG"
+                <a-image 
+                    src="assets/PFIC_SITE.JPG"
                     width="1.6" 
                     height=".9" 
-                    position="0 0 0"
+                    position="0 0.05 0"
                     rotation="-90 0 0"
                     opacity="0"
-                    animation__fade="property: opacity; to: 1; dur: 1000; delay: 100"
-                ></a-image>     
+                    animation="property: opacity; to: 0.9; dur: 800; delay: 100; easing: easeOutQuad"
+                ></a-image>
 
-                <!-- 3D Models with enhanced animations -->
+                <!-- 3D Models - Elevated and dramatic -->
                 <a-entity
                     id="spinneret-stress"
-                    position="1.3 -1 .9"
+                    position="1.3 0 .9"
                     scale="0.001 0.001 0.001"
                     rotation="-60 0 0"
                     animation-mixer="loop: repeat"
                     gltf-model="url(assets/spinneret-stress.glb)"
-                    animation__enter="property: position; to: 1.3 0 .9; dur: 1000; delay: 1200; easing: easeOutBounce"
-                    animation__scale="property: scale; to: 0.25 0.25 0.25; dur: 1000; delay: 1200; easing: easeOutBack"
-                    animation__rotate="property: rotation; to: -60 360 0; dur: 20000; loop: true; easing: linear; delay: 2200"
-                    animation__float="property: position; to: 1.3 0.15 .9; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine; delay: 2200"
+                    animation__rise="property: position; to: 1.3 0.4 .9; dur: 1200; delay: 1200; easing: easeOutBack"
+                    animation__scale="property: scale; to: 0.25 0.25 0.25; dur: 1200; delay: 1200; easing: easeOutBack"
+                    animation__rotate="property: rotation; to: -60 360 0; dur: 20000; loop: true; easing: linear; delay: 2400"
+                    animation__float="property: position; to: 1.3 0.5 .9; dir: alternate; dur: 2500; loop: true; easing: easeInOutSine; delay: 2400"
                     class="clickable"
                     gesture-handler
                 ></a-entity>
+                
+                <!-- Minimal glow ring -->
+                <a-ring
+                    position="1.3 0.03 .9"
+                    rotation="-90 0 0"
+                    radius-inner="0.25"
+                    radius-outer="0.3"
+                    color="#fff"
+                    opacity="0"
+                    animation="property: opacity; to: 0.3; dur: 600; delay: 1200"
+                    animation__pulse="property: radius-outer; to: 0.35; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine; delay: 2400"
+                    animation__fade="property: opacity; to: 0.5; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine; delay: 2400"
+                ></a-ring>
             
                 <a-entity
                     id="Parker_filter_2"
-                    position="0.6 -1 .75"
+                    position="0.6 0 .75"
                     scale="0.001 0.001 0.001"
                     rotation="45 0 0"
                     animation-mixer="loop: repeat"
                     gltf-model="url(assets/Parker_filter_2.glb)"
-                    animation__enter="property: position; to: 0.6 0 .75; dur: 1000; delay: 1400; easing: easeOutBounce"
-                    animation__scale="property: scale; to: 0.85 0.85 0.85; dur: 1000; delay: 1400; easing: easeOutBack"
-                    animation__rotate="property: rotation; to: 45 360 0; dur: 15000; loop: true; easing: linear; delay: 2400"
-                    animation__bob="property: position; to: 0.6 0.15 .75; dir: alternate; dur: 2500; loop: true; easing: easeInOutSine; delay: 2400"
+                    animation__rise="property: position; to: 0.6 0.35 .75; dur: 1200; delay: 1400; easing: easeOutBack"
+                    animation__scale="property: scale; to: 0.85 0.85 0.85; dur: 1200; delay: 1400; easing: easeOutBack"
+                    animation__rotate="property: rotation; to: 45 360 0; dur: 15000; loop: true; easing: linear; delay: 2600"
+                    animation__float="property: position; to: 0.6 0.45 .75; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 2600"
                     class="clickable"
                     gesture-handler
                 ></a-entity>
                 
-                <!-- Interactive Glow Rings around 3D models -->
-                <a-ring id="glow-ring-1"
-                    position="1.3 0.01 .9"
+                <!-- Minimal glow ring -->
+                <a-ring
+                    position="0.6 0.03 .75"
                     rotation="-90 0 0"
-                    radius-inner="0.3"
-                    radius-outer="0.35"
-                    color="#1a73e8"
-                    opacity="0.3"
-                    animation="property: radius-outer; to: 0.45; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine; delay: 2200"
-                    animation__opacity="property: opacity; to: 0.6; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine; delay: 2200"
+                    radius-inner="0.35"
+                    radius-outer="0.4"
+                    color="#fff"
+                    opacity="0"
+                    animation="property: opacity; to: 0.3; dur: 600; delay: 1400"
+                    animation__pulse="property: radius-outer; to: 0.45; dir: alternate; dur: 2200; loop: true; easing: easeInOutSine; delay: 2600"
+                    animation__fade="property: opacity; to: 0.5; dir: alternate; dur: 2200; loop: true; easing: easeInOutSine; delay: 2600"
                 ></a-ring>
                 
-                <a-ring id="glow-ring-2"
-                    position="0.6 0.01 .75"
-                    rotation="-90 0 0"
-                    radius-inner="0.4"
-                    radius-outer="0.45"
-                    color="#34a853"
-                    opacity="0.3"
-                    animation="property: radius-outer; to: 0.55; dir: alternate; dur: 1800; loop: true; easing: easeInOutSine; delay: 2400"
-                    animation__opacity="property: opacity; to: 0.6; dir: alternate; dur: 1800; loop: true; easing: easeInOutSine; delay: 2400"
-                ></a-ring>
-                
-                <!-- Ground plane with gradient effect -->
+                <!-- AR Buttons - Floating above QR code area (top right) -->
+                <!-- Video Control Button -->
                 <a-plane
-                    position="0 -0.01 0"
+                    id="video-btn"
+                    position="1.3 0.3 -.5"
                     rotation="-90 0 0"
-                    width="4"
-                    height="4"
-                    color="#1a73e8"
-                    opacity="0.1"
-                    animation="property: opacity; to: 0.15; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine"
-                ></a-plane>
+                    width="0.25"
+                    height="0.25"
+                    color="#fff"
+                    opacity="0"
+                    animation="property: opacity; to: 0.8; dur: 600; delay: 1800; easing: easeOutQuad"
+                    animation__float="property: position; to: 1.3 0.35 -.5; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine; delay: 2400"
+                    class="clickable"
+                >
+                    <!-- Play/Pause Icon -->
+                    <a-text
+                        value="▶"
+                        align="center"
+                        color="#000"
+                        width="1.5"
+                        position="0 0 0.01"
+                    ></a-text>
+                </a-plane>
+                
+                <!-- Info Button -->
+                <a-plane
+                    id="info-btn"
+                    position="0.95 0.3 -.5"
+                    rotation="-90 0 0"
+                    width="0.25"
+                    height="0.25"
+                    color="#fff"
+                    opacity="0"
+                    animation="property: opacity; to: 0.8; dur: 600; delay: 2000; easing: easeOutQuad"
+                    animation__float="property: position; to: 0.95 0.35 -.5; dir: alternate; dur: 2200; loop: true; easing: easeInOutSine; delay: 2600"
+                    class="clickable"
+                >
+                    <a-text
+                        value="i"
+                        align="center"
+                        color="#000"
+                        width="2"
+                        position="0 0 0.01"
+                    ></a-text>
+                </a-plane>
+                
+                <!-- Info Panel - Appears in AR when info button clicked -->
+                <a-plane
+                    id="info-panel"
+                    position="0 0.5 -0.8"
+                    width="2.5"
+                    height="1.5"
+                    color="#000"
+                    opacity="0"
+                    visible="false"
+                    material="transparent: true; opacity: 0.95"
+                >
+                    <a-text
+                        value="SIMON\nFiltration Engineer\nParker Hannifin PFIC\n\nSpecializations:\n• Nanofiber Production\n• CFD/FEA Simulation\n• VR Visualization\n• Advanced Analytics\n\nPh.D. Student\nMembrane Science"
+                        align="center"
+                        color="#fff"
+                        width="2.2"
+                        position="0 0.1 0.01"
+                        line-height="55"
+                    ></a-text>
+                    
+                    <!-- Close button -->
+                    <a-circle
+                        id="close-btn"
+                        position="1 0.6 0.01"
+                        radius="0.08"
+                        color="#fff"
+                        opacity="0.9"
+                        class="clickable"
+                    >
+                        <a-text
+                            value="×"
+                            align="center"
+                            color="#000"
+                            width="1"
+                            position="0 0 0.01"
+                        ></a-text>
+                    </a-circle>
+                </a-plane>
+                
+                <!-- Floating particles - Minimal -->
+                <a-entity id="particles">
+                    <a-sphere
+                        position="1.2 0.6 0"
+                        radius="0.02"
+                        color="#fff"
+                        opacity="0.6"
+                        animation="property: position; to: 1.2 0.8 0; dir: alternate; dur: 2500; loop: true; easing: easeInOutSine"
+                    ></a-sphere>
+                    <a-sphere
+                        position="-0.8 0.6 0.5"
+                        radius="0.02"
+                        color="#fff"
+                        opacity="0.5"
+                        animation="property: position; to: -0.8 0.75 0.5; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine"
+                    ></a-sphere>
+                    <a-sphere
+                        position="0 0.7 -0.8"
+                        radius="0.015"
+                        color="#fff"
+                        opacity="0.4"
+                        animation="property: position; to: 0 0.9 -0.8; dir: alternate; dur: 2800; loop: true; easing: easeInOutSine"
+                    ></a-sphere>
+                </a-entity>
                 
             </a-marker>
 
@@ -516,289 +396,99 @@
         </a-scene>
     
         <script>
-            // Global state
-            let markerFound = false;
-            let animationsEnabled = true;
-            let particlesEnabled = true;
-            let videoPlaying = false;
-            let statsVisible = false;
-            let cameraReady = false;
-            
             const video = document.querySelector('#pfic_ar');
-            const scene = document.querySelector('#scene');
-            const marker = document.querySelector('#animated-marker');
-            const loadingScreen = document.getElementById('loading-screen');
-            const loadingText = document.getElementById('loading-text');
-            const startArBtn = document.getElementById('start-ar-btn');
-            const instructions = document.getElementById('instructions');
-            const controls = document.getElementById('controls');
-            const infoPanel = document.getElementById('info-panel');
-            const statsDisplay = document.getElementById('stats-display');
-            const particleSystem = document.querySelector('#particle-system');
+            const marker = document.querySelector('a-marker');
+            const loading = document.getElementById('loading');
+            const status = document.getElementById('status');
+            const scene = document.querySelector('a-scene');
+            const infoPanel = document.querySelector('#info-panel');
+            let videoPlaying = false;
+            let infoPanelVisible = false;
             
-            // Request camera permissions explicitly
-            async function requestCameraPermission() {
-                try {
-                    loadingText.textContent = 'Requesting camera access...';
-                    
-                    // Request camera permission
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'environment' // Use back camera on mobile
-                        } 
-                    });
-                    
-                    // Stop the stream immediately (AR.js will handle it)
-                    stream.getTracks().forEach(track => track.stop());
-                    
-                    loadingText.textContent = 'Camera access granted! Initializing AR...';
-                    cameraReady = true;
-                    
-                    // Initialize AR scene
-                    setTimeout(() => {
-                        loadingScreen.classList.add('hidden');
-                        instructions.style.display = 'block';
-                    }, 1000);
-                    
-                    return true;
-                } catch (error) {
-                    console.error('Camera permission error:', error);
-                    loadingText.textContent = 'Camera access denied. Please grant permission and try again.';
-                    startArBtn.style.display = 'block';
-                    startArBtn.textContent = 'Try Again';
-                    return false;
-                }
-            }
-            
-            // Start AR button handler
-            startArBtn.addEventListener('click', () => {
-                startArBtn.style.display = 'none';
-                requestCameraPermission();
-            });
-            
-            // Initialize when scene is loaded
+            // Hide loading after scene loads
             scene.addEventListener('loaded', () => {
-                console.log('Scene loaded');
-                loadingText.textContent = 'Scene loaded! Click to start...';
-                startArBtn.style.display = 'block';
-                startArBtn.textContent = 'Start AR Experience';
+                setTimeout(() => {
+                    loading.classList.add('hidden');
+                }, 1000);
             });
-            
-            // Auto-request permissions after a short delay
-            setTimeout(() => {
-                if (!cameraReady) {
-                    requestCameraPermission();
-                }
-            }, 1500);
             
             // Marker detection
             marker.addEventListener('markerFound', () => {
-                console.log('🎯 Marker detected!');
-                markerFound = true;
-                instructions.innerHTML = '✅ Marker Found! Explore the AR experience';
-                instructions.classList.add('found');
-                document.getElementById('marker-status').textContent = 'Detected ✅';
+                console.log('Marker detected');
+                status.textContent = 'AR Active';
+                status.classList.add('detected');
                 
-                // Play video when marker found
+                // Auto-play video
                 if (video && video.paused) {
-                    video.play().catch(e => console.log('Video play error:', e));
+                    video.play().catch(e => console.log('Video autoplay prevented'));
                     videoPlaying = true;
-                    document.getElementById('toggle-video').innerHTML = '<span>⏸️</span> Pause Video';
                 }
-                
-                // Trigger entrance animations
-                triggerEntranceAnimations();
             });
             
             marker.addEventListener('markerLost', () => {
-                console.log('❌ Marker lost');
-                markerFound = false;
-                instructions.innerHTML = '📱 Point your camera at the business card marker';
-                instructions.classList.remove('found');
-                document.getElementById('marker-status').textContent = 'Not Detected ❌';
+                console.log('Marker lost');
+                status.textContent = 'Point at marker';
+                status.classList.remove('detected');
+                
+                // Hide info panel if visible
+                if (infoPanelVisible) {
+                    infoPanel.setAttribute('visible', false);
+                    infoPanel.setAttribute('animation', 'property: opacity; to: 0; dur: 300');
+                    infoPanelVisible = false;
+                }
             });
             
-            // Video toggle
-            document.getElementById('toggle-video').addEventListener('click', () => {
-                const btn = document.getElementById('toggle-video');
+            // Video button click
+            document.querySelector('#video-btn').addEventListener('click', () => {
+                const btn = document.querySelector('#video-btn a-text');
                 if (video.paused) {
                     video.play();
+                    btn.setAttribute('value', '⏸');
                     videoPlaying = true;
-                    btn.innerHTML = '<span>⏸️</span> Pause Video';
-                    btn.classList.remove('active');
                 } else {
                     video.pause();
+                    btn.setAttribute('value', '▶');
                     videoPlaying = false;
-                    btn.innerHTML = '<span>▶️</span> Play Video';
-                    btn.classList.add('active');
                 }
             });
             
-            // Animation toggle
-            document.getElementById('toggle-animations').addEventListener('click', () => {
-                const btn = document.getElementById('toggle-animations');
-                animationsEnabled = !animationsEnabled;
-                
-                const animatedElements = document.querySelectorAll('[animation], [animation__rotate], [animation__float], [animation__bob], [animation__pulse]');
-                
-                if (animationsEnabled) {
-                    animatedElements.forEach(el => {
-                        el.setAttribute('animation', el.getAttribute('animation'));
-                        // Re-apply all animation components
-                        const attrs = el.attributes;
-                        for (let i = 0; i < attrs.length; i++) {
-                            if (attrs[i].name.startsWith('animation')) {
-                                el.setAttribute(attrs[i].name, attrs[i].value);
-                            }
-                        }
-                    });
-                    btn.classList.remove('active');
-                    btn.innerHTML = '<span>✨</span> Animations On';
+            // Info button click
+            document.querySelector('#info-btn').addEventListener('click', () => {
+                if (!infoPanelVisible) {
+                    infoPanel.setAttribute('visible', true);
+                    infoPanel.setAttribute('animation', 'property: opacity; to: 0.95; dur: 400; easing: easeOutQuad');
+                    infoPanelVisible = true;
                 } else {
-                    animatedElements.forEach(el => {
-                        const attrs = el.attributes;
-                        for (let i = 0; i < attrs.length; i++) {
-                            if (attrs[i].name.startsWith('animation')) {
-                                el.removeAttribute(attrs[i].name);
-                            }
-                        }
-                    });
-                    btn.classList.add('active');
-                    btn.innerHTML = '<span>💤</span> Animations Off';
+                    infoPanel.setAttribute('animation', 'property: opacity; to: 0; dur: 300');
+                    setTimeout(() => {
+                        infoPanel.setAttribute('visible', false);
+                    }, 300);
+                    infoPanelVisible = false;
                 }
             });
             
-            // Particle toggle
-            document.getElementById('toggle-particles').addEventListener('click', () => {
-                const btn = document.getElementById('toggle-particles');
-                particlesEnabled = !particlesEnabled;
-                
-                if (particleSystem) {
-                    particleSystem.setAttribute('visible', particlesEnabled);
-                }
-                
-                if (particlesEnabled) {
-                    btn.classList.remove('active');
-                    btn.innerHTML = '<span>⭐</span> Particles On';
-                } else {
-                    btn.classList.add('active');
-                    btn.innerHTML = '<span>⚫</span> Particles Off';
-                }
+            // Close button
+            document.querySelector('#close-btn').addEventListener('click', () => {
+                infoPanel.setAttribute('animation', 'property: opacity; to: 0; dur: 300');
+                setTimeout(() => {
+                    infoPanel.setAttribute('visible', false);
+                }, 300);
+                infoPanelVisible = false;
             });
             
-            // Info panel toggle
-            document.getElementById('show-info').addEventListener('click', () => {
-                infoPanel.classList.toggle('visible');
-            });
-            
-            document.getElementById('close-info').addEventListener('click', () => {
-                infoPanel.classList.remove('visible');
-            });
-            
-            // Stats toggle
-            document.getElementById('toggle-stats').addEventListener('click', () => {
-                const btn = document.getElementById('toggle-stats');
-                statsVisible = !statsVisible;
-                statsDisplay.classList.toggle('visible');
-                
-                if (statsVisible) {
-                    btn.classList.add('active');
-                    startStatsMonitoring();
-                } else {
-                    btn.classList.remove('active');
-                    stopStatsMonitoring();
-                }
-            });
-            
-            // FAB button - Quick info
-            document.getElementById('fab-btn').addEventListener('click', () => {
-                alert('💡 Quick Tips:\n\n' +
-                      '• Pinch to zoom 3D models\n' +
-                      '• Tap models to interact\n' +
-                      '• Keep marker visible\n' +
-                      '• Use good lighting\n' +
-                      '• Toggle particles for better performance');
-            });
-            
-            // Stats monitoring
-            let statsInterval = null;
-            let lastTime = Date.now();
-            let frames = 0;
-            
-            function startStatsMonitoring() {
-                lastTime = Date.now();
-                frames = 0;
-                
-                statsInterval = setInterval(() => {
-                    // FPS calculation
-                    const now = Date.now();
-                    const delta = now - lastTime;
-                    const fps = Math.round((frames * 1000) / delta);
-                    document.getElementById('fps-counter').textContent = fps;
-                    
-                    // Reset counters
-                    lastTime = now;
-                    frames = 0;
-                    
-                    // Count objects
-                    const objects = document.querySelectorAll('a-image, a-entity[gltf-model]').length;
-                    document.getElementById('object-count').textContent = objects;
-                }, 1000);
-                
-                // Frame counter
-                scene.addEventListener('renderstart', () => {
-                    frames++;
-                });
-            }
-            
-            function stopStatsMonitoring() {
-                if (statsInterval) {
-                    clearInterval(statsInterval);
-                    statsInterval = null;
-                }
-            }
-            
-            // Entrance animations trigger
-            function triggerEntranceAnimations() {
-                // All animations are handled via A-Frame's delay parameter
-                // This function can be used for additional custom animations
-                console.log('🎬 Entrance animations triggered');
-            }
-            
-            // Click on 3D models for special effects
-            const models = document.querySelectorAll('.clickable[gltf-model]');
-            models.forEach(model => {
-                model.addEventListener('click', function() {
-                    // Pulse effect on click
-                    const currentScale = this.getAttribute('scale');
-                    const scaleValues = currentScale.x;
-                    
-                    this.setAttribute('animation__click', {
-                        property: 'scale',
-                        to: `${scaleValues * 1.2} ${scaleValues * 1.2} ${scaleValues * 1.2}`,
-                        dur: 200,
-                        dir: 'alternate',
-                        loop: 1,
-                        easing: 'easeInOutQuad'
-                    });
-                    
-                    // Vibration feedback if supported
-                    if (navigator.vibrate) {
-                        navigator.vibrate(50);
-                    }
-                });
-            });
-            
-            // Auto-enable video on any user interaction
-            document.body.addEventListener('click', () => {
-                if (video && video.paused && markerFound) {
+            // Enable video on touch (mobile requirement)
+            document.body.addEventListener('touchstart', () => {
+                if (video && video.paused) {
                     video.play().catch(e => console.log('Video play error:', e));
                 }
             }, { once: true });
             
-            // Console styling
-            console.log('%c🎨 Simon\'s AR Business Card ', 'background: #1a73e8; color: white; padding: 10px; font-size: 16px; font-weight: bold;');
-            console.log('%cPowered by AR.js + A-Frame', 'color: #34a853; font-size: 12px;');
+            // Click anywhere to play video
+            document.body.addEventListener('click', () => {
+                if (video && video.paused) {
+                    video.play().catch(e => console.log('Video play error:', e));
+                }
+            }, { once: true });
         </script>
     
     </body>
