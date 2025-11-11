@@ -263,10 +263,11 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- INFO PANEL - Faces camera -->
+                <!-- INFO PANEL - Lays flat on card like other images -->
                 <a-entity
                     id="info-panel"
-                    position="0 0.8 -0.3"
+                    position="-0.8 0.2 0.3"
+                    rotation="-90 0 0"
                     visible="false"
                 >
                     <!-- Background -->
@@ -387,23 +388,6 @@
                         ></a-text>
                     </a-plane>
                     
-                    <!-- Close Button -->
-                    <a-circle
-                        id="close-btn"
-                        position="1.35 1.1 0.02"
-                        radius="0.18"
-                        color="#fff"
-                        opacity="0.95"
-                        class="clickable"
-                    >
-                        <a-text
-                            value="✕"
-                            align="center"
-                            color="#000"
-                            width="1.3"
-                            position="0 0 0.01"
-                        ></a-text>
-                    </a-circle>
                 </a-entity>
                 
             </a-marker>
@@ -422,7 +406,6 @@
             const status = document.getElementById('status');
             const tapInstruction = document.getElementById('tap-instruction');
             const infoPanel = document.querySelector('#info-panel');
-            const closeBtn = document.querySelector('#close-btn');
             const linkedinBtn = document.querySelector('#linkedin-btn');
             
             let infoPanelVisible = false;
@@ -496,6 +479,15 @@
                     easing: 'easeOutBack'
                 });
                 
+                // Move Simon's photo to the right when panel opens
+                const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
+                simonPhoto.setAttribute('animation__move', {
+                    property: 'position',
+                    to: '1.8 0.25 -.1',
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+                
                 infoPanelVisible = true;
                 tapInstruction.textContent = 'TAP SCREEN TO CLOSE';
                 status.textContent = 'Viewing info';
@@ -517,6 +509,15 @@
                     dur: 300
                 });
                 
+                // Move Simon's photo back to original position
+                const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
+                simonPhoto.setAttribute('animation__move', {
+                    property: 'position',
+                    to: '1.3 0.25 -.1',
+                    dur: 300,
+                    easing: 'easeInQuad'
+                });
+                
                 setTimeout(() => {
                     infoPanel.setAttribute('visible', false);
                 }, 300);
@@ -525,13 +526,6 @@
                 tapInstruction.textContent = 'TAP SCREEN FOR INFO';
                 status.textContent = 'AR Active';
             }
-            
-            // Close button
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log('❌ Close button clicked!');
-                hideInfo();
-            });
             
             // LinkedIn button
             linkedinBtn.addEventListener('click', (e) => {
