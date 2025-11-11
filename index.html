@@ -263,10 +263,11 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- INFO PANEL - Faces camera -->
+                <!-- INFO PANEL - Rotated to face camera -->
                 <a-entity
                     id="info-panel"
                     position="0 0.8 -0.3"
+                    rotation="0 180 0"
                     visible="false"
                 >
                     <!-- Background -->
@@ -451,19 +452,27 @@
                 }
             });
             
-            // TAP ANYWHERE on screen to open info
+            // TAP ANYWHERE on screen to toggle info
             document.addEventListener('touchstart', (e) => {
-                if (markerVisible && !infoPanelVisible) {
-                    console.log('📱 Screen tapped - opening info');
-                    showInfo();
+                if (markerVisible) {
+                    console.log('📱 Screen tapped - toggling info');
+                    if (!infoPanelVisible) {
+                        showInfo();
+                    } else {
+                        hideInfo();
+                    }
                 }
             });
             
             // Also handle click for desktop testing
             document.addEventListener('click', (e) => {
-                if (markerVisible && !infoPanelVisible && !e.target.closest('.clickable')) {
-                    console.log('🖱️ Screen clicked - opening info');
-                    showInfo();
+                if (markerVisible && !e.target.closest('.clickable')) {
+                    console.log('🖱️ Screen clicked - toggling info');
+                    if (!infoPanelVisible) {
+                        showInfo();
+                    } else {
+                        hideInfo();
+                    }
                 }
             });
             
@@ -489,7 +498,7 @@
                 });
                 
                 infoPanelVisible = true;
-                tapInstruction.classList.add('hidden');
+                tapInstruction.textContent = 'TAP SCREEN TO CLOSE';
                 status.textContent = 'Viewing info';
             }
             
@@ -514,7 +523,7 @@
                 }, 300);
                 
                 infoPanelVisible = false;
-                tapInstruction.classList.remove('hidden');
+                tapInstruction.textContent = 'TAP SCREEN FOR INFO';
                 status.textContent = 'AR Active';
             }
             
