@@ -31,20 +31,47 @@
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                color: rgba(255, 255, 255, 0.8);
-                font-size: 13px;
-                padding: 10px 20px;
-                background: rgba(0, 0, 0, 0.7);
-                border-radius: 20px;
-                backdrop-filter: blur(10px);
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 14px;
+                padding: 12px 24px;
+                background: rgba(0, 0, 0, 0.8);
+                border-radius: 25px;
+                border: 1px solid rgba(255,255,255,0.3);
                 z-index: 1000;
                 pointer-events: none;
+            }
+            
+            #instructions {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: #fff;
+                font-size: 16px;
+                padding: 15px 30px;
+                background: rgba(0, 0, 0, 0.85);
+                border-radius: 25px;
+                border: 2px solid #fff;
+                z-index: 1001;
+                text-align: center;
+                animation: pulse 2s infinite;
+                backdrop-filter: blur(10px);
+            }
+            
+            #instructions.hidden {
+                display: none;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: translateX(-50%) scale(1); }
+                50% { transform: translateX(-50%) scale(1.05); }
             }
         </style>
     </head>
 
     <body>
-        <div id="status">Point camera at marker</div>
+        <div id="status">Point at marker</div>
+        <div id="instructions">👆 TAP the pulsing ⓘ next to photo</div>
 
         <a-scene
             vr-mode-ui="enabled: false"
@@ -83,7 +110,7 @@
                 <a-entity light="type: ambient; color: #fff; intensity: 0.9"></a-entity>
                 <a-entity light="type: directional; color: #fff; intensity: 1" position="2 4 2"></a-entity>
                 
-                <!-- VIDEO PLANE - Elevated and visible -->
+                <!-- VIDEO PLANE -->
                 <a-plane
                     position="0 0.6 0"
                     rotation="-45 0 0"
@@ -95,7 +122,7 @@
                     animation__float="property: position; to: 0 0.65 0; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1300"
                 ></a-plane>
                 
-                <!-- Ground site image -->
+                <!-- Ground image -->
                 <a-image 
                     src="assets/PFIC_SITE.JPG"
                     width="1.6" 
@@ -117,55 +144,55 @@
                     animation__float="property: position; to: 1.3 0.25 -.1; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 800"
                 ></a-image>
                 
-                <!-- CLICKABLE INFO INDICATOR - Next to your photo -->
-                <a-entity 
-                    id="info-indicator"
-                    position="1.65 0.35 -.1"
+                <!-- CLICKABLE INFO BUTTON - Larger hit area -->
+                <a-cylinder
+                    id="info-btn"
+                    position="1.7 0.35 -.1"
                     rotation="-90 0 0"
+                    radius="0.18"
+                    height="0.02"
+                    color="#fff"
+                    opacity="0"
+                    animation="property: opacity; to: 0.95; dur: 600; delay: 2000"
+                    animation__pulse="property: scale; to: 1.3 1.3 1.3; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine; delay: 2600"
                     class="clickable"
+                    event-set__enter="_event: mouseenter; scale: 1.4 1.4 1.4"
+                    event-set__leave="_event: mouseleave; scale: 1 1 1"
                 >
-                    <!-- Outer pulse ring -->
-                    <a-ring
-                        radius-inner="0.12"
-                        radius-outer="0.15"
-                        color="#fff"
-                        opacity="0"
-                        animation="property: opacity; to: 0.6; dur: 600; delay: 2000"
-                        animation__pulse="property: scale; to: 1.4 1.4 1.4; loop: true; dur: 1500; easing: easeInOutSine; delay: 2600"
-                        animation__fade="property: opacity; from: 0.6; to: 0.2; loop: true; dur: 1500; easing: easeInOutSine; delay: 2600"
-                    ></a-ring>
-                    
-                    <!-- Main circle button -->
-                    <a-circle
-                        radius="0.12"
-                        color="#fff"
-                        opacity="0"
-                        animation="property: opacity; to: 0.95; dur: 600; delay: 2000"
-                        position="0 0 0.01"
-                    >
-                        <!-- Info icon -->
-                        <a-text
-                            value="i"
-                            align="center"
-                            color="#000"
-                            width="0.8"
-                            position="0 0 0.02"
-                            wrap-count="1"
-                        ></a-text>
-                    </a-circle>
-                    
-                    <!-- Tap me text -->
+                    <!-- Info icon -->
                     <a-text
-                        value="TAP"
+                        value="ℹ"
                         align="center"
-                        color="#fff"
-                        width="0.4"
-                        position="0 -0.2 0.02"
-                        opacity="0"
-                        animation="property: opacity; to: 0.9; dur: 600; delay: 2200"
-                        animation__pulse="property: scale; to: 1.1 1.1 1.1; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine; delay: 2800"
+                        color="#000"
+                        width="1"
+                        position="0 0 0.015"
+                        wrap-count="1"
                     ></a-text>
-                </a-entity>
+                    
+                    <!-- Pulsing outer ring -->
+                    <a-ring
+                        position="0 0 -0.005"
+                        radius-inner="0.2"
+                        radius-outer="0.24"
+                        color="#fff"
+                        opacity="0.4"
+                        animation__pulse="property: scale; to: 1.5 1.5 1.5; loop: true; dur: 1500; easing: easeInOutSine"
+                        animation__fade="property: opacity; from: 0.4; to: 0; loop: true; dur: 1500; easing: easeInOutSine"
+                    ></a-ring>
+                </a-cylinder>
+                
+                <!-- TAP text below button -->
+                <a-text
+                    value="TAP"
+                    align="center"
+                    color="#fff"
+                    width="0.5"
+                    position="1.7 0.15 -.1"
+                    rotation="-90 0 0"
+                    opacity="0"
+                    animation="property: opacity; to: 1; dur: 600; delay: 2200"
+                    animation__pulse="property: scale; to: 1.15 1.15 1.15; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine; delay: 2800"
+                ></a-text>
                 
                 <!-- Other Images -->
                 <a-image 
@@ -237,30 +264,30 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- MODERN INFO PANEL - Glassmorphism style -->
+                <!-- INFO PANEL -->
                 <a-entity
                     id="info-panel"
                     position="0 0.8 -0.2"
                     visible="false"
                 >
-                    <!-- Semi-transparent dark panel with border -->
+                    <!-- Background -->
                     <a-plane
                         width="3"
                         height="2.5"
                         color="#000"
                         opacity="0"
-                        material="transparent: true; opacity: 0.9"
+                        material="transparent: true; opacity: 0.92"
                     >
-                        <!-- Glowing border effect -->
+                        <!-- Border -->
                         <a-plane
-                            width="3.05"
-                            height="2.55"
+                            width="3.06"
+                            height="2.56"
                             color="#fff"
-                            opacity="0.15"
+                            opacity="0.2"
                             position="0 0 -0.01"
                         ></a-plane>
                         
-                        <!-- Top accent line -->
+                        <!-- Top line -->
                         <a-plane
                             width="3"
                             height="0.01"
@@ -270,10 +297,8 @@
                         ></a-plane>
                     </a-plane>
                     
-                    <!-- Content Container -->
+                    <!-- Content -->
                     <a-entity position="0 0 0.02">
-                        
-                        <!-- Name - Large -->
                         <a-text
                             value="SIMON PADRON"
                             align="center"
@@ -283,220 +308,212 @@
                             letter-spacing="2"
                         ></a-text>
                         
-                        <!-- Title -->
                         <a-text
-                            value="Filtration Engineer"
+                            value="Filtration Engineer\nParker Hannifin PFIC"
                             align="center"
                             color="#ccc"
-                            width="2.2"
-                            position="0 0.7 0"
+                            width="2.1"
+                            position="0 0.6 0"
+                            line-height="48"
                         ></a-text>
                         
-                        <!-- Company -->
-                        <a-text
-                            value="Parker Hannifin PFIC"
-                            align="center"
-                            color="#aaa"
-                            width="2"
-                            position="0 0.5 0"
-                        ></a-text>
-                        
-                        <!-- Divider line -->
                         <a-plane
                             width="2.5"
                             height="0.005"
                             color="#fff"
                             opacity="0.2"
-                            position="0 0.3 0"
+                            position="0 0.35 0"
                         ></a-plane>
                         
-                        <!-- Education -->
                         <a-text
-                            value="Ph.D. Student"
+                            value="Ph.D. Student | Membrane Science"
                             align="center"
                             color="#fff"
-                            width="2"
-                            position="0 0.05 0"
+                            width="2.2"
+                            position="0 0.1 0"
                         ></a-text>
                         
                         <a-text
-                            value="Membrane Science & Hollow Fiber\nPolyimide Membranes"
+                            value="Hollow Fiber Polyimide Membranes\nfor Gas Separation"
                             align="center"
                             color="#bbb"
-                            width="2.2"
-                            position="0 -0.2 0"
+                            width="2.3"
+                            position="0 -0.15 0"
                             line-height="45"
                         ></a-text>
                         
-                        <!-- Specializations -->
                         <a-text
                             value="Specializations"
                             align="center"
                             color="#fff"
-                            width="1.8"
-                            position="0 -0.5 0"
+                            width="1.9"
+                            position="0 -0.48 0"
                         ></a-text>
                         
                         <a-text
                             value="Nanofiber Production • CFD/FEA Simulation\nVR Visualization • Advanced Analytics"
                             align="center"
                             color="#aaa"
-                            width="2.4"
-                            position="0 -0.75 0"
+                            width="2.5"
+                            position="0 -0.73 0"
                             line-height="45"
                         ></a-text>
-                        
                     </a-entity>
                     
-                    <!-- LinkedIn Button - Modern style -->
-                    <a-entity
+                    <!-- LinkedIn Button - Larger clickable area -->
+                    <a-cylinder
                         id="linkedin-btn"
                         position="0 -1.05 0.02"
+                        rotation="90 0 0"
+                        radius="0.85"
+                        height="0.08"
+                        color="#0077B5"
+                        opacity="1"
                         class="clickable"
+                        event-set__enter="_event: mouseenter; scale: 1.08 1.08 1.08"
+                        event-set__leave="_event: mouseleave; scale: 1 1 1"
                     >
-                        <a-plane
-                            width="1.6"
-                            height="0.3"
+                        <!-- Glow -->
+                        <a-cylinder
+                            position="0 0 0"
+                            radius="0.9"
+                            height="0.09"
                             color="#0077B5"
-                            opacity="1"
-                        >
-                            <!-- Button glow -->
-                            <a-plane
-                                width="1.65"
-                                height="0.35"
-                                color="#0077B5"
-                                opacity="0.3"
-                                position="0 0 -0.01"
-                            ></a-plane>
-                            
-                            <a-text
-                                value="CONNECT ON LINKEDIN"
-                                align="center"
-                                color="#fff"
-                                width="4"
-                                position="0 0 0.01"
-                                letter-spacing="1"
-                            ></a-text>
-                        </a-plane>
-                    </a-entity>
+                            opacity="0.3"
+                        ></a-cylinder>
+                        
+                        <a-text
+                            value="CONNECT ON LINKEDIN"
+                            align="center"
+                            color="#fff"
+                            width="4.5"
+                            position="0 0 0.045"
+                            rotation="-90 0 0"
+                            letter-spacing="1"
+                        ></a-text>
+                    </a-cylinder>
                     
-                    <!-- Close Button - Top right corner -->
-                    <a-entity
+                    <!-- Close Button - Larger -->
+                    <a-cylinder
                         id="close-btn"
                         position="1.35 1.1 0.02"
+                        rotation="90 0 0"
+                        radius="0.18"
+                        height="0.05"
+                        color="#fff"
+                        opacity="0.95"
                         class="clickable"
+                        event-set__enter="_event: mouseenter; scale: 1.15 1.15 1.15"
+                        event-set__leave="_event: mouseleave; scale: 1 1 1"
                     >
-                        <a-circle
-                            radius="0.15"
-                            color="#fff"
-                            opacity="0.9"
-                        >
-                            <a-text
-                                value="✕"
-                                align="center"
-                                color="#000"
-                                width="1.2"
-                                position="0 0 0.01"
-                            ></a-text>
-                        </a-circle>
-                    </a-entity>
+                        <a-text
+                            value="✕"
+                            align="center"
+                            color="#000"
+                            width="1.3"
+                            position="0 0 0.03"
+                            rotation="-90 0 0"
+                        ></a-text>
+                    </a-cylinder>
                 </a-entity>
                 
             </a-marker>
 
-            <a-entity camera></a-entity>
+            <!-- Camera with cursor for click detection -->
+            <a-entity camera>
+                <a-entity 
+                    cursor="fuse: false; rayOrigin: mouse"
+                    raycaster="objects: .clickable; far: 20"
+                ></a-entity>
+            </a-entity>
         </a-scene>
     
         <script>
             const video = document.querySelector('#pfic_ar');
             const marker = document.querySelector('a-marker');
             const status = document.getElementById('status');
-            const infoIndicator = document.querySelector('#info-indicator');
+            const instructions = document.getElementById('instructions');
+            const infoBtn = document.querySelector('#info-btn');
             const infoPanel = document.querySelector('#info-panel');
+            const closeBtn = document.querySelector('#close-btn');
+            const linkedinBtn = document.querySelector('#linkedin-btn');
             
             let infoPanelVisible = false;
             
             // Marker events
             marker.addEventListener('markerFound', () => {
                 console.log('✅ Marker detected!');
-                status.textContent = 'AR Active - Tap info icon';
+                status.textContent = 'AR Active';
                 
                 // Auto-start video
                 setTimeout(() => {
                     video.play().then(() => {
                         console.log('✅ Video playing');
-                    }).catch(e => {
-                        console.log('Video autoplay prevented');
-                    });
+                    }).catch(e => console.log('Video autoplay prevented'));
                 }, 1000);
             });
             
             marker.addEventListener('markerLost', () => {
                 console.log('❌ Marker lost');
-                status.textContent = 'Point camera at marker';
+                status.textContent = 'Point at marker';
                 if (infoPanelVisible) {
-                    hideInfoPanel();
+                    hideInfo();
                 }
             });
             
-            // Info indicator click - Using mousedown for better mobile response
-            infoIndicator.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-                console.log('ℹ️ Info indicator clicked!');
-                showInfoPanel();
+            // Info button - Multiple event types
+            infoBtn.addEventListener('click', (e) => {
+                console.log('🔵 Info button CLICKED!');
+                showInfo();
             });
             
-            // Also add click event as fallback
-            infoIndicator.addEventListener('click', function(e) {
-                e.stopPropagation();
-                console.log('ℹ️ Info indicator clicked (click event)!');
-                if (!infoPanelVisible) {
-                    showInfoPanel();
-                }
+            infoBtn.addEventListener('mousedown', (e) => {
+                console.log('🔵 Info button MOUSEDOWN!');
             });
             
-            function showInfoPanel() {
-                console.log('Showing info panel...');
+            infoBtn.addEventListener('mouseenter', (e) => {
+                console.log('🔵 Info button HOVER!');
+            });
+            
+            function showInfo() {
+                console.log('📱 Opening info panel...');
                 infoPanel.setAttribute('visible', true);
                 
-                // Fade in animation
                 const panel = infoPanel.querySelector('a-plane');
                 panel.setAttribute('animation', {
-                    property: 'opacity',
+                    property: 'material.opacity',
                     from: 0,
-                    to: 0.9,
+                    to: 0.92,
                     dur: 500,
                     easing: 'easeOutQuad'
                 });
                 
-                // Scale in animation
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
-                    from: '0.8 0.8 0.8',
+                    from: '0.7 0.7 0.7',
                     to: '1 1 1',
                     dur: 500,
                     easing: 'easeOutBack'
                 });
                 
                 infoPanelVisible = true;
+                instructions.classList.add('hidden');
                 status.textContent = 'Viewing info';
             }
             
-            function hideInfoPanel() {
-                console.log('Hiding info panel...');
+            function hideInfo() {
+                console.log('📱 Closing info panel...');
                 
-                // Fade out
                 const panel = infoPanel.querySelector('a-plane');
                 panel.setAttribute('animation', {
-                    property: 'opacity',
+                    property: 'material.opacity',
                     to: 0,
                     dur: 300
                 });
                 
-                // Scale out
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
-                    to: '0.8 0.8 0.8',
+                    to: '0.7 0.7 0.7',
                     dur: 300
                 });
                 
@@ -505,43 +522,44 @@
                 }, 300);
                 
                 infoPanelVisible = false;
-                status.textContent = 'AR Active - Tap info icon';
+                instructions.classList.remove('hidden');
+                status.textContent = 'AR Active';
             }
             
             // Close button
-            const closeBtn = document.querySelector('#close-btn');
-            closeBtn.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-                console.log('✕ Close button clicked');
-                hideInfoPanel();
+            closeBtn.addEventListener('click', (e) => {
+                console.log('❌ Close button CLICKED!');
+                hideInfo();
             });
             
-            closeBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                console.log('✕ Close button clicked (click event)');
-                hideInfoPanel();
+            closeBtn.addEventListener('mousedown', (e) => {
+                console.log('❌ Close button MOUSEDOWN!');
             });
             
             // LinkedIn button
-            const linkedinBtn = document.querySelector('#linkedin-btn');
-            linkedinBtn.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-                console.log('🔗 LinkedIn button clicked');
+            linkedinBtn.addEventListener('click', (e) => {
+                console.log('🔗 LinkedIn button CLICKED!');
                 window.open('https://www.linkedin.com/in/simonpadron/', '_blank');
             });
             
-            linkedinBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                console.log('🔗 LinkedIn button clicked (click event)');
+            linkedinBtn.addEventListener('mousedown', (e) => {
+                console.log('🔗 LinkedIn button MOUSEDOWN!');
+            });
+            
+            // Fallback: tap anywhere on screen
+            let tappedOnce = false;
+            document.addEventListener('touchstart', (e) => {
+                if (!tappedOnce && !infoPanelVisible) {
+                    console.log('📱 Screen tapped - trying to open info');
+                    tappedOnce = true;
+                    setTimeout(() => { tappedOnce = false; }, 500);
+                    showInfo();
+                }
             });
             
             // Video events
             video.addEventListener('loadeddata', () => {
                 console.log('✅ Video loaded');
-            });
-            
-            video.addEventListener('error', (e) => {
-                console.error('❌ Video error:', video.error);
             });
         </script>
     
