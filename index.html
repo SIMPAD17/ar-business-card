@@ -40,38 +40,11 @@
                 z-index: 1000;
                 pointer-events: none;
             }
-            
-            #instructions {
-                position: fixed;
-                bottom: 30px;
-                left: 50%;
-                transform: translateX(-50%);
-                color: #fff;
-                font-size: 16px;
-                padding: 15px 30px;
-                background: rgba(0, 0, 0, 0.85);
-                border-radius: 25px;
-                border: 2px solid #fff;
-                z-index: 1001;
-                text-align: center;
-                animation: pulse 2s infinite;
-                backdrop-filter: blur(10px);
-            }
-            
-            #instructions.hidden {
-                display: none;
-            }
-            
-            @keyframes pulse {
-                0%, 100% { transform: translateX(-50%) scale(1); }
-                50% { transform: translateX(-50%) scale(1.05); }
-            }
         </style>
     </head>
 
     <body>
         <div id="status">Point at marker</div>
-        <div id="instructions">👆 TAP the pulsing ⓘ next to photo</div>
 
         <a-scene
             vr-mode-ui="enabled: false"
@@ -144,7 +117,7 @@
                     animation__float="property: position; to: 1.3 0.25 -.1; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 800"
                 ></a-image>
                 
-                <!-- CLICKABLE INFO BUTTON - Larger hit area -->
+                <!-- CLICKABLE INFO BUTTON - Flat on card like images -->
                 <a-cylinder
                     id="info-btn"
                     position="1.7 0.35 -.1"
@@ -154,34 +127,34 @@
                     color="#fff"
                     opacity="0"
                     animation="property: opacity; to: 0.95; dur: 600; delay: 2000"
-                    animation__pulse="property: scale; to: 1.3 1.3 1.3; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine; delay: 2600"
+                    animation__pulse="property: scale; to: 1.3 1 1.3; dir: alternate; loop: true; dur: 1200; easing: easeInOutSine; delay: 2600"
                     class="clickable"
-                    event-set__enter="_event: mouseenter; scale: 1.4 1.4 1.4"
+                    event-set__enter="_event: mouseenter; scale: 1.4 1 1.4"
                     event-set__leave="_event: mouseleave; scale: 1 1 1"
                 >
-                    <!-- Info icon -->
+                    <!-- Info icon text -->
                     <a-text
                         value="ℹ"
                         align="center"
                         color="#000"
                         width="1"
-                        position="0 0 0.015"
+                        position="0 0.015 0"
                         wrap-count="1"
                     ></a-text>
                     
                     <!-- Pulsing outer ring -->
                     <a-ring
-                        position="0 0 -0.005"
+                        position="0 -0.005 0"
                         radius-inner="0.2"
                         radius-outer="0.24"
                         color="#fff"
                         opacity="0.4"
-                        animation__pulse="property: scale; to: 1.5 1.5 1.5; loop: true; dur: 1500; easing: easeInOutSine"
+                        animation__pulse="property: scale; to: 1.5 1 1.5; loop: true; dur: 1500; easing: easeInOutSine"
                         animation__fade="property: opacity; from: 0.4; to: 0; loop: true; dur: 1500; easing: easeInOutSine"
                     ></a-ring>
                 </a-cylinder>
                 
-                <!-- TAP text below button -->
+                <!-- TAP text -->
                 <a-text
                     value="TAP"
                     align="center"
@@ -191,7 +164,7 @@
                     rotation="-90 0 0"
                     opacity="0"
                     animation="property: opacity; to: 1; dur: 600; delay: 2200"
-                    animation__pulse="property: scale; to: 1.15 1.15 1.15; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine; delay: 2800"
+                    animation__pulse="property: scale; to: 1.15 1 1.15; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine; delay: 2800"
                 ></a-text>
                 
                 <!-- Other Images -->
@@ -264,10 +237,11 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- INFO PANEL -->
+                <!-- INFO PANEL - Faces camera -->
                 <a-entity
                     id="info-panel"
-                    position="0 0.8 -0.2"
+                    position="0 0.8 -0.3"
+                    rotation="0 0 0"
                     visible="false"
                 >
                     <!-- Background -->
@@ -360,50 +334,46 @@
                         ></a-text>
                     </a-entity>
                     
-                    <!-- LinkedIn Button - Larger clickable area -->
-                    <a-cylinder
+                    <!-- LinkedIn Button - Rounded rectangle facing camera -->
+                    <a-plane
                         id="linkedin-btn"
                         position="0 -1.05 0.02"
-                        rotation="90 0 0"
-                        radius="0.85"
-                        height="0.08"
+                        width="1.8"
+                        height="0.35"
                         color="#0077B5"
                         opacity="1"
                         class="clickable"
-                        event-set__enter="_event: mouseenter; scale: 1.08 1.08 1.08"
+                        event-set__enter="_event: mouseenter; scale: 1.08 1.08 1"
                         event-set__leave="_event: mouseleave; scale: 1 1 1"
                     >
                         <!-- Glow -->
-                        <a-cylinder
-                            position="0 0 0"
-                            radius="0.9"
-                            height="0.09"
+                        <a-plane
+                            position="0 0 -0.005"
+                            width="1.85"
+                            height="0.4"
                             color="#0077B5"
                             opacity="0.3"
-                        ></a-cylinder>
+                        ></a-plane>
                         
                         <a-text
                             value="CONNECT ON LINKEDIN"
                             align="center"
                             color="#fff"
                             width="4.5"
-                            position="0 0 0.045"
-                            rotation="-90 0 0"
+                            position="0 0 0.01"
                             letter-spacing="1"
                         ></a-text>
-                    </a-cylinder>
+                    </a-plane>
                     
-                    <!-- Close Button - Larger -->
-                    <a-cylinder
+                    <!-- Close Button - Circle facing camera -->
+                    <a-circle
                         id="close-btn"
                         position="1.35 1.1 0.02"
-                        rotation="90 0 0"
                         radius="0.18"
-                        height="0.05"
                         color="#fff"
                         opacity="0.95"
                         class="clickable"
-                        event-set__enter="_event: mouseenter; scale: 1.15 1.15 1.15"
+                        event-set__enter="_event: mouseenter; scale: 1.15 1.15 1"
                         event-set__leave="_event: mouseleave; scale: 1 1 1"
                     >
                         <a-text
@@ -411,15 +381,14 @@
                             align="center"
                             color="#000"
                             width="1.3"
-                            position="0 0 0.03"
-                            rotation="-90 0 0"
+                            position="0 0 0.01"
                         ></a-text>
-                    </a-cylinder>
+                    </a-circle>
                 </a-entity>
                 
             </a-marker>
 
-            <!-- Camera with cursor for click detection -->
+            <!-- Camera with cursor -->
             <a-entity camera>
                 <a-entity 
                     cursor="fuse: false; rayOrigin: mouse"
@@ -432,7 +401,6 @@
             const video = document.querySelector('#pfic_ar');
             const marker = document.querySelector('a-marker');
             const status = document.getElementById('status');
-            const instructions = document.getElementById('instructions');
             const infoBtn = document.querySelector('#info-btn');
             const infoPanel = document.querySelector('#info-panel');
             const closeBtn = document.querySelector('#close-btn');
@@ -443,7 +411,7 @@
             // Marker events
             marker.addEventListener('markerFound', () => {
                 console.log('✅ Marker detected!');
-                status.textContent = 'AR Active';
+                status.textContent = 'AR Active - Tap ⓘ for info';
                 
                 // Auto-start video
                 setTimeout(() => {
@@ -461,18 +429,10 @@
                 }
             });
             
-            // Info button - Multiple event types
+            // Info button clicks
             infoBtn.addEventListener('click', (e) => {
-                console.log('🔵 Info button CLICKED!');
+                console.log('🔵 Info button clicked!');
                 showInfo();
-            });
-            
-            infoBtn.addEventListener('mousedown', (e) => {
-                console.log('🔵 Info button MOUSEDOWN!');
-            });
-            
-            infoBtn.addEventListener('mouseenter', (e) => {
-                console.log('🔵 Info button HOVER!');
             });
             
             function showInfo() {
@@ -497,7 +457,6 @@
                 });
                 
                 infoPanelVisible = true;
-                instructions.classList.add('hidden');
                 status.textContent = 'Viewing info';
             }
             
@@ -522,39 +481,19 @@
                 }, 300);
                 
                 infoPanelVisible = false;
-                instructions.classList.remove('hidden');
-                status.textContent = 'AR Active';
+                status.textContent = 'AR Active - Tap ⓘ for info';
             }
             
             // Close button
             closeBtn.addEventListener('click', (e) => {
-                console.log('❌ Close button CLICKED!');
+                console.log('❌ Close button clicked!');
                 hideInfo();
-            });
-            
-            closeBtn.addEventListener('mousedown', (e) => {
-                console.log('❌ Close button MOUSEDOWN!');
             });
             
             // LinkedIn button
             linkedinBtn.addEventListener('click', (e) => {
-                console.log('🔗 LinkedIn button CLICKED!');
+                console.log('🔗 LinkedIn button clicked!');
                 window.open('https://www.linkedin.com/in/simonpadron/', '_blank');
-            });
-            
-            linkedinBtn.addEventListener('mousedown', (e) => {
-                console.log('🔗 LinkedIn button MOUSEDOWN!');
-            });
-            
-            // Fallback: tap anywhere on screen
-            let tappedOnce = false;
-            document.addEventListener('touchstart', (e) => {
-                if (!tappedOnce && !infoPanelVisible) {
-                    console.log('📱 Screen tapped - trying to open info');
-                    tappedOnce = true;
-                    setTimeout(() => { tappedOnce = false; }, 500);
-                    showInfo();
-                }
             });
             
             // Video events
