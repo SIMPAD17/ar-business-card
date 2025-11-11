@@ -31,47 +31,20 @@
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                color: #fff;
-                font-size: 14px;
-                padding: 12px 24px;
-                background: rgba(0, 0, 0, 0.9);
-                border-radius: 25px;
-                border: 1px solid rgba(255,255,255,0.3);
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 13px;
+                padding: 10px 20px;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 20px;
+                backdrop-filter: blur(10px);
                 z-index: 1000;
                 pointer-events: none;
-            }
-            
-            #tap-hint {
-                position: fixed;
-                bottom: 40px;
-                left: 50%;
-                transform: translateX(-50%);
-                color: #fff;
-                font-size: 18px;
-                font-weight: bold;
-                padding: 20px 40px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 30px;
-                border: 2px solid #fff;
-                z-index: 1001;
-                animation: pulse 2s infinite;
-                backdrop-filter: blur(10px);
-            }
-            
-            #tap-hint.hidden {
-                display: none;
-            }
-            
-            @keyframes pulse {
-                0%, 100% { transform: translateX(-50%) scale(1); }
-                50% { transform: translateX(-50%) scale(1.08); }
             }
         </style>
     </head>
 
     <body>
-        <div id="status">Point at marker</div>
-        <div id="tap-hint">👆 TAP WHITE BUTTONS ABOVE CARD</div>
+        <div id="status">Point camera at marker</div>
 
         <a-scene
             vr-mode-ui="enabled: false"
@@ -110,9 +83,8 @@
                 <a-entity light="type: ambient; color: #fff; intensity: 0.9"></a-entity>
                 <a-entity light="type: directional; color: #fff; intensity: 1" position="2 4 2"></a-entity>
                 
-                <!-- VIDEO PLANE - ELEVATED AND VISIBLE -->
+                <!-- VIDEO PLANE - Elevated and visible -->
                 <a-plane
-                    id="video-plane"
                     position="0 0.6 0"
                     rotation="-45 0 0"
                     width="1.8"
@@ -123,7 +95,7 @@
                     animation__float="property: position; to: 0 0.65 0; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1300"
                 ></a-plane>
                 
-                <!-- Ground site image - LOWER -->
+                <!-- Ground site image -->
                 <a-image 
                     src="assets/PFIC_SITE.JPG"
                     width="1.6" 
@@ -134,7 +106,7 @@
                     animation="property: opacity; to: 0.8; dur: 800; delay: 100"
                 ></a-image>
                 
-                <!-- Other Images -->
+                <!-- Your Photo -->
                 <a-image 
                     src="assets/simon.JPG"
                     position="1.3 0.2 -.1"
@@ -145,6 +117,57 @@
                     animation__float="property: position; to: 1.3 0.25 -.1; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 800"
                 ></a-image>
                 
+                <!-- CLICKABLE INFO INDICATOR - Next to your photo -->
+                <a-entity 
+                    id="info-indicator"
+                    position="1.65 0.35 -.1"
+                    rotation="-90 0 0"
+                    class="clickable"
+                >
+                    <!-- Outer pulse ring -->
+                    <a-ring
+                        radius-inner="0.12"
+                        radius-outer="0.15"
+                        color="#fff"
+                        opacity="0"
+                        animation="property: opacity; to: 0.6; dur: 600; delay: 2000"
+                        animation__pulse="property: scale; to: 1.4 1.4 1.4; loop: true; dur: 1500; easing: easeInOutSine; delay: 2600"
+                        animation__fade="property: opacity; from: 0.6; to: 0.2; loop: true; dur: 1500; easing: easeInOutSine; delay: 2600"
+                    ></a-ring>
+                    
+                    <!-- Main circle button -->
+                    <a-circle
+                        radius="0.12"
+                        color="#fff"
+                        opacity="0"
+                        animation="property: opacity; to: 0.95; dur: 600; delay: 2000"
+                        position="0 0 0.01"
+                    >
+                        <!-- Info icon -->
+                        <a-text
+                            value="i"
+                            align="center"
+                            color="#000"
+                            width="0.8"
+                            position="0 0 0.02"
+                            wrap-count="1"
+                        ></a-text>
+                    </a-circle>
+                    
+                    <!-- Tap me text -->
+                    <a-text
+                        value="TAP"
+                        align="center"
+                        color="#fff"
+                        width="0.4"
+                        position="0 -0.2 0.02"
+                        opacity="0"
+                        animation="property: opacity; to: 0.9; dur: 600; delay: 2200"
+                        animation__pulse="property: scale; to: 1.1 1.1 1.1; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine; delay: 2800"
+                    ></a-text>
+                </a-entity>
+                
+                <!-- Other Images -->
                 <a-image 
                     src="assets/parker-logo.jpg"
                     position="-.42 0.2 -.62"
@@ -214,151 +237,168 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- INTERACTIVE MENU - Very high and large -->
-                <a-entity id="menu" position="0 1 -0.5">
-                    
-                    <!-- Play/Pause Button -->
-                    <a-entity
-                        id="video-btn"
-                        position="-0.4 0 0"
-                        class="clickable"
-                    >
-                        <a-box
-                            width="0.7"
-                            height="0.25"
-                            depth="0.06"
-                            color="#fff"
-                            opacity="0"
-                            animation="property: opacity; to: 1; dur: 800; delay: 2000"
-                            animation__pulse="property: scale; to: 1.15 1.15 1.15; dir: alternate; dur: 1200; loop: true; easing: easeInOutSine; delay: 2800"
-                        >
-                            <a-text
-                                id="video-text"
-                                value="▶ PLAY"
-                                align="center"
-                                color="#000"
-                                width="2.8"
-                                position="0 0 0.035"
-                            ></a-text>
-                        </a-box>
-                    </a-entity>
-                    
-                    <!-- Info Button -->
-                    <a-entity
-                        id="info-btn"
-                        position="0.4 0 0"
-                        class="clickable"
-                    >
-                        <a-box
-                            width="0.7"
-                            height="0.25"
-                            depth="0.06"
-                            color="#fff"
-                            opacity="0"
-                            animation="property: opacity; to: 1; dur: 800; delay: 2200"
-                            animation__pulse="property: scale; to: 1.15 1.15 1.15; dir: alternate; dur: 1400; loop: true; easing: easeInOutSine; delay: 3000"
-                        >
-                            <a-text
-                                value="ℹ INFO"
-                                align="center"
-                                color="#000"
-                                width="2.8"
-                                position="0 0 0.035"
-                            ></a-text>
-                        </a-box>
-                    </a-entity>
-                    
-                </a-entity>
-                
-                <!-- Info Panel -->
+                <!-- MODERN INFO PANEL - Glassmorphism style -->
                 <a-entity
                     id="info-panel"
-                    position="0 1 -0.3"
+                    position="0 0.8 -0.2"
                     visible="false"
                 >
+                    <!-- Semi-transparent dark panel with border -->
                     <a-plane
-                        width="2.8"
-                        height="2.2"
+                        width="3"
+                        height="2.5"
                         color="#000"
-                        opacity="0.95"
+                        opacity="0"
+                        material="transparent: true; opacity: 0.9"
                     >
+                        <!-- Glowing border effect -->
                         <a-plane
-                            width="2.85"
-                            height="2.25"
+                            width="3.05"
+                            height="2.55"
                             color="#fff"
-                            opacity="0.3"
+                            opacity="0.15"
                             position="0 0 -0.01"
+                        ></a-plane>
+                        
+                        <!-- Top accent line -->
+                        <a-plane
+                            width="3"
+                            height="0.01"
+                            color="#fff"
+                            opacity="0.5"
+                            position="0 1.245 0.01"
                         ></a-plane>
                     </a-plane>
                     
-                    <a-text
-                        value="SIMON PADRON"
-                        align="center"
-                        color="#fff"
-                        width="2.4"
-                        position="0 0.9 0.01"
-                    ></a-text>
-                    
-                    <a-text
-                        value="Filtration Engineer\nParker Hannifin PFIC"
-                        align="center"
-                        color="#ccc"
-                        width="2.2"
-                        position="0 0.6 0.01"
-                        line-height="50"
-                    ></a-text>
-                    
-                    <a-text
-                        value="Ph.D. Student | Membrane Science\n\nSpecializations:\n• Nanofiber Production\n• CFD/FEA Simulation\n• VR Visualization\n• Advanced Analytics"
-                        align="center"
-                        color="#fff"
-                        width="2.3"
-                        position="0 0.05 0.01"
-                        line-height="48"
-                    ></a-text>
-                    
-                    <!-- LinkedIn Button -->
-                    <a-entity
-                        id="linkedin-btn"
-                        position="0 -0.7 0.01"
-                        class="clickable"
-                    >
-                        <a-box
-                            width="1.4"
-                            height="0.25"
-                            depth="0.05"
-                            color="#0077B5"
-                        >
-                            <a-text
-                                value="🔗 LINKEDIN"
-                                align="center"
-                                color="#fff"
-                                width="3.5"
-                                position="0 0 0.03"
-                            ></a-text>
-                        </a-box>
+                    <!-- Content Container -->
+                    <a-entity position="0 0 0.02">
+                        
+                        <!-- Name - Large -->
+                        <a-text
+                            value="SIMON PADRON"
+                            align="center"
+                            color="#fff"
+                            width="2.6"
+                            position="0 1 0"
+                            letter-spacing="2"
+                        ></a-text>
+                        
+                        <!-- Title -->
+                        <a-text
+                            value="Filtration Engineer"
+                            align="center"
+                            color="#ccc"
+                            width="2.2"
+                            position="0 0.7 0"
+                        ></a-text>
+                        
+                        <!-- Company -->
+                        <a-text
+                            value="Parker Hannifin PFIC"
+                            align="center"
+                            color="#aaa"
+                            width="2"
+                            position="0 0.5 0"
+                        ></a-text>
+                        
+                        <!-- Divider line -->
+                        <a-plane
+                            width="2.5"
+                            height="0.005"
+                            color="#fff"
+                            opacity="0.2"
+                            position="0 0.3 0"
+                        ></a-plane>
+                        
+                        <!-- Education -->
+                        <a-text
+                            value="Ph.D. Student"
+                            align="center"
+                            color="#fff"
+                            width="2"
+                            position="0 0.05 0"
+                        ></a-text>
+                        
+                        <a-text
+                            value="Membrane Science & Hollow Fiber\nPolyimide Membranes"
+                            align="center"
+                            color="#bbb"
+                            width="2.2"
+                            position="0 -0.2 0"
+                            line-height="45"
+                        ></a-text>
+                        
+                        <!-- Specializations -->
+                        <a-text
+                            value="Specializations"
+                            align="center"
+                            color="#fff"
+                            width="1.8"
+                            position="0 -0.5 0"
+                        ></a-text>
+                        
+                        <a-text
+                            value="Nanofiber Production • CFD/FEA Simulation\nVR Visualization • Advanced Analytics"
+                            align="center"
+                            color="#aaa"
+                            width="2.4"
+                            position="0 -0.75 0"
+                            line-height="45"
+                        ></a-text>
+                        
                     </a-entity>
                     
-                    <!-- Close Button -->
+                    <!-- LinkedIn Button - Modern style -->
                     <a-entity
-                        id="close-btn"
-                        position="1.2 0.95 0.01"
+                        id="linkedin-btn"
+                        position="0 -1.05 0.02"
                         class="clickable"
                     >
-                        <a-box
-                            width="0.25"
-                            height="0.25"
-                            depth="0.05"
+                        <a-plane
+                            width="1.6"
+                            height="0.3"
+                            color="#0077B5"
+                            opacity="1"
+                        >
+                            <!-- Button glow -->
+                            <a-plane
+                                width="1.65"
+                                height="0.35"
+                                color="#0077B5"
+                                opacity="0.3"
+                                position="0 0 -0.01"
+                            ></a-plane>
+                            
+                            <a-text
+                                value="CONNECT ON LINKEDIN"
+                                align="center"
+                                color="#fff"
+                                width="4"
+                                position="0 0 0.01"
+                                letter-spacing="1"
+                            ></a-text>
+                        </a-plane>
+                    </a-entity>
+                    
+                    <!-- Close Button - Top right corner -->
+                    <a-entity
+                        id="close-btn"
+                        position="1.35 1.1 0.02"
+                        class="clickable"
+                    >
+                        <a-circle
+                            radius="0.15"
                             color="#fff"
+                            opacity="0.9"
                         >
                             <a-text
                                 value="✕"
                                 align="center"
                                 color="#000"
-                                width="2.5"
-                                position="0 0 0.03"
+                                width="1.2"
+                                position="0 0 0.01"
                             ></a-text>
-                        </a-box>
+                        </a-circle>
                     </a-entity>
                 </a-entity>
                 
@@ -371,152 +411,137 @@
             const video = document.querySelector('#pfic_ar');
             const marker = document.querySelector('a-marker');
             const status = document.getElementById('status');
-            const tapHint = document.getElementById('tap-hint');
+            const infoIndicator = document.querySelector('#info-indicator');
             const infoPanel = document.querySelector('#info-panel');
-            const videoText = document.querySelector('#video-text');
             
-            let videoPlaying = false;
             let infoPanelVisible = false;
             
             // Marker events
             marker.addEventListener('markerFound', () => {
-                console.log('✅ Marker found!');
-                status.textContent = 'AR Active - Tap buttons!';
+                console.log('✅ Marker detected!');
+                status.textContent = 'AR Active - Tap info icon';
                 
                 // Auto-start video
                 setTimeout(() => {
-                    if (!videoPlaying) {
-                        playVideo();
-                    }
+                    video.play().then(() => {
+                        console.log('✅ Video playing');
+                    }).catch(e => {
+                        console.log('Video autoplay prevented');
+                    });
                 }, 1000);
             });
             
             marker.addEventListener('markerLost', () => {
                 console.log('❌ Marker lost');
-                status.textContent = 'Point at marker';
+                status.textContent = 'Point camera at marker';
                 if (infoPanelVisible) {
-                    hideInfo();
+                    hideInfoPanel();
                 }
             });
             
-            // Play video function
-            function playVideo() {
-                console.log('Attempting to play video...');
-                video.play().then(() => {
-                    console.log('✅ Video playing!');
-                    videoPlaying = true;
-                    videoText.setAttribute('value', '⏸ PAUSE');
-                    tapHint.classList.add('hidden');
-                }).catch(e => {
-                    console.error('❌ Video play failed:', e);
-                    console.log('Video state:', {
-                        paused: video.paused,
-                        muted: video.muted,
-                        readyState: video.readyState,
-                        src: video.src
-                    });
-                });
-            }
-            
-            // Video button - using mousedown for better mobile support
-            const videoBtn = document.querySelector('#video-btn');
-            videoBtn.addEventListener('click', function(e) {
-                console.log('🎬 Video button CLICKED!');
+            // Info indicator click - Using mousedown for better mobile response
+            infoIndicator.addEventListener('mousedown', function(e) {
                 e.stopPropagation();
-                
-                if (!videoPlaying) {
-                    playVideo();
-                } else {
-                    video.pause();
-                    videoPlaying = false;
-                    videoText.setAttribute('value', '▶ PLAY');
-                    console.log('⏸ Video paused');
-                }
+                console.log('ℹ️ Info indicator clicked!');
+                showInfoPanel();
             });
             
-            // Also try mousedown
-            videoBtn.addEventListener('mousedown', function(e) {
-                console.log('🎬 Video button MOUSEDOWN!');
-            });
-            
-            // Info button
-            const infoBtn = document.querySelector('#info-btn');
-            infoBtn.addEventListener('click', function(e) {
-                console.log('ℹ️ Info button CLICKED!');
+            // Also add click event as fallback
+            infoIndicator.addEventListener('click', function(e) {
                 e.stopPropagation();
-                
+                console.log('ℹ️ Info indicator clicked (click event)!');
                 if (!infoPanelVisible) {
-                    showInfo();
-                } else {
-                    hideInfo();
+                    showInfoPanel();
                 }
             });
             
-            function showInfo() {
-                console.log('Showing info panel');
+            function showInfoPanel() {
+                console.log('Showing info panel...');
                 infoPanel.setAttribute('visible', true);
+                
+                // Fade in animation
+                const panel = infoPanel.querySelector('a-plane');
+                panel.setAttribute('animation', {
+                    property: 'opacity',
+                    from: 0,
+                    to: 0.9,
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+                
+                // Scale in animation
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
-                    from: '0.1 0.1 0.1',
+                    from: '0.8 0.8 0.8',
                     to: '1 1 1',
-                    dur: 400,
+                    dur: 500,
                     easing: 'easeOutBack'
                 });
+                
                 infoPanelVisible = true;
+                status.textContent = 'Viewing info';
             }
             
-            function hideInfo() {
-                console.log('Hiding info panel');
-                infoPanel.setAttribute('animation', {
-                    property: 'scale',
-                    to: '0.1 0.1 0.1',
+            function hideInfoPanel() {
+                console.log('Hiding info panel...');
+                
+                // Fade out
+                const panel = infoPanel.querySelector('a-plane');
+                panel.setAttribute('animation', {
+                    property: 'opacity',
+                    to: 0,
                     dur: 300
                 });
+                
+                // Scale out
+                infoPanel.setAttribute('animation', {
+                    property: 'scale',
+                    to: '0.8 0.8 0.8',
+                    dur: 300
+                });
+                
                 setTimeout(() => {
                     infoPanel.setAttribute('visible', false);
                 }, 300);
+                
                 infoPanelVisible = false;
+                status.textContent = 'AR Active - Tap info icon';
             }
             
             // Close button
             const closeBtn = document.querySelector('#close-btn');
-            closeBtn.addEventListener('click', function(e) {
-                console.log('✕ Close button clicked');
+            closeBtn.addEventListener('mousedown', function(e) {
                 e.stopPropagation();
-                hideInfo();
+                console.log('✕ Close button clicked');
+                hideInfoPanel();
+            });
+            
+            closeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log('✕ Close button clicked (click event)');
+                hideInfoPanel();
             });
             
             // LinkedIn button
             const linkedinBtn = document.querySelector('#linkedin-btn');
-            linkedinBtn.addEventListener('click', function(e) {
-                console.log('🔗 LinkedIn button clicked');
+            linkedinBtn.addEventListener('mousedown', function(e) {
                 e.stopPropagation();
+                console.log('🔗 LinkedIn button clicked');
                 window.open('https://www.linkedin.com/in/simonpadron/', '_blank');
             });
             
-            // Tap screen to start video
-            document.addEventListener('touchstart', (e) => {
-                console.log('📱 Screen touched');
-                if (!videoPlaying) {
-                    playVideo();
-                }
+            linkedinBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                console.log('🔗 LinkedIn button clicked (click event)');
             });
             
-            // Video events for debugging
+            // Video events
             video.addEventListener('loadeddata', () => {
-                console.log('✅ Video loaded successfully');
+                console.log('✅ Video loaded');
             });
             
             video.addEventListener('error', (e) => {
                 console.error('❌ Video error:', video.error);
-            });
-            
-            video.addEventListener('play', () => {
-                console.log('▶️ Video play event fired');
-            });
-            
-            video.addEventListener('playing', () => {
-                console.log('🎬 Video is playing');
             });
         </script>
     
