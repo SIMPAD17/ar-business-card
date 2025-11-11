@@ -31,47 +31,47 @@
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                color: rgba(255, 255, 255, 0.9);
-                font-size: 13px;
-                padding: 10px 20px;
-                background: rgba(0, 0, 0, 0.8);
-                border-radius: 20px;
-                backdrop-filter: blur(10px);
+                color: #fff;
+                font-size: 14px;
+                padding: 12px 24px;
+                background: rgba(0, 0, 0, 0.9);
+                border-radius: 25px;
+                border: 1px solid rgba(255,255,255,0.3);
                 z-index: 1000;
                 pointer-events: none;
             }
             
-            /* Tap to play prompt */
-            #play-prompt {
+            #tap-hint {
                 position: fixed;
-                bottom: 30px;
+                bottom: 40px;
                 left: 50%;
                 transform: translateX(-50%);
                 color: #fff;
-                font-size: 16px;
-                padding: 15px 30px;
-                background: rgba(0, 0, 0, 0.9);
+                font-size: 18px;
+                font-weight: bold;
+                padding: 20px 40px;
+                background: rgba(255, 255, 255, 0.2);
                 border-radius: 30px;
                 border: 2px solid #fff;
                 z-index: 1001;
                 animation: pulse 2s infinite;
-                cursor: pointer;
+                backdrop-filter: blur(10px);
             }
             
-            #play-prompt.hidden {
+            #tap-hint.hidden {
                 display: none;
             }
             
             @keyframes pulse {
                 0%, 100% { transform: translateX(-50%) scale(1); }
-                50% { transform: translateX(-50%) scale(1.05); }
+                50% { transform: translateX(-50%) scale(1.08); }
             }
         </style>
     </head>
 
     <body>
-        <div id="status">AR Active - Look for menu above card</div>
-        <div id="play-prompt">TAP TO START VIDEO</div>
+        <div id="status">Point at marker</div>
+        <div id="tap-hint">👆 TAP WHITE BUTTONS ABOVE CARD</div>
 
         <a-scene
             vr-mode-ui="enabled: false"
@@ -90,6 +90,7 @@
                     loop="true"
                     playsinline
                     webkit-playsinline
+                    muted
                 ></video>
             </a-assets>
 
@@ -106,11 +107,34 @@
                 smoothThreshold="5"
             >
                 <!-- Lighting -->
-                <a-entity light="type: ambient; color: #fff; intensity: 0.8"></a-entity>
+                <a-entity light="type: ambient; color: #fff; intensity: 0.9"></a-entity>
                 <a-entity light="type: directional; color: #fff; intensity: 1" position="2 4 2"></a-entity>
-                <a-entity light="type: point; color: #fff; intensity: 0.5" position="0 3 0"></a-entity>
                 
-                <!-- Images -->
+                <!-- VIDEO PLANE - ELEVATED AND VISIBLE -->
+                <a-plane
+                    id="video-plane"
+                    position="0 0.6 0"
+                    rotation="-45 0 0"
+                    width="1.8"
+                    height="1"
+                    material="src: #pfic_ar; shader: flat; side: double"
+                    opacity="0"
+                    animation="property: opacity; to: 1; dur: 800; delay: 500"
+                    animation__float="property: position; to: 0 0.65 0; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine; delay: 1300"
+                ></a-plane>
+                
+                <!-- Ground site image - LOWER -->
+                <a-image 
+                    src="assets/PFIC_SITE.JPG"
+                    width="1.6" 
+                    height=".9" 
+                    position="0 0.05 0"
+                    rotation="-90 0 0"
+                    opacity="0"
+                    animation="property: opacity; to: 0.8; dur: 800; delay: 100"
+                ></a-image>
+                
+                <!-- Other Images -->
                 <a-image 
                     src="assets/simon.JPG"
                     position="1.3 0.2 -.1"
@@ -160,18 +184,8 @@
                     animation="property: opacity; to: 1; dur: 600; delay: 1000"
                     animation__float="property: position; to: 1.32 0.23 .35; dir: alternate; dur: 2800; loop: true; easing: easeInOutSine; delay: 1600"
                 ></a-image>
-                
-                <a-image 
-                    src="assets/PFIC_SITE.JPG"
-                    width="1.6" 
-                    height=".9" 
-                    position="0 0.05 0"
-                    rotation="-90 0 0"
-                    opacity="0"
-                    animation="property: opacity; to: 0.9; dur: 800; delay: 100"
-                ></a-image>
 
-                <!-- 3D Models - Simple rotation -->
+                <!-- 3D Models -->
                 <a-entity
                     id="spinneret-stress"
                     position="1.3 0 .9"
@@ -200,106 +214,97 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- LARGE Interactive Menu - High above card, very visible -->
-                <a-entity id="ar-menu" position="0 0.8 -0.4">
+                <!-- INTERACTIVE MENU - Very high and large -->
+                <a-entity id="menu" position="0 1 -0.5">
                     
-                    <!-- Video Control - Large and visible -->
-                    <a-box
+                    <!-- Play/Pause Button -->
+                    <a-entity
                         id="video-btn"
-                        position="-0.35 0 0"
-                        width="0.6"
-                        height="0.2"
-                        depth="0.05"
-                        color="#fff"
-                        opacity="0"
-                        animation="property: opacity; to: 1; dur: 800; delay: 2000"
-                        animation__pulse="property: scale; to: 1.1 1.1 1.1; dir: alternate; dur: 1500; loop: true; easing: easeInOutSine; delay: 2800"
+                        position="-0.4 0 0"
                         class="clickable"
                     >
-                        <a-text
-                            id="video-btn-text"
-                            value="▶ PLAY VIDEO"
-                            align="center"
-                            color="#000"
-                            width="2.5"
-                            position="0 0 0.03"
-                        ></a-text>
-                    </a-box>
+                        <a-box
+                            width="0.7"
+                            height="0.25"
+                            depth="0.06"
+                            color="#fff"
+                            opacity="0"
+                            animation="property: opacity; to: 1; dur: 800; delay: 2000"
+                            animation__pulse="property: scale; to: 1.15 1.15 1.15; dir: alternate; dur: 1200; loop: true; easing: easeInOutSine; delay: 2800"
+                        >
+                            <a-text
+                                id="video-text"
+                                value="▶ PLAY"
+                                align="center"
+                                color="#000"
+                                width="2.8"
+                                position="0 0 0.035"
+                            ></a-text>
+                        </a-box>
+                    </a-entity>
                     
-                    <!-- Info Button - Large and visible -->
-                    <a-box
+                    <!-- Info Button -->
+                    <a-entity
                         id="info-btn"
-                        position="0.35 0 0"
-                        width="0.6"
-                        height="0.2"
-                        depth="0.05"
-                        color="#fff"
-                        opacity="0"
-                        animation="property: opacity; to: 1; dur: 800; delay: 2200"
-                        animation__pulse="property: scale; to: 1.1 1.1 1.1; dir: alternate; dur: 1700; loop: true; easing: easeInOutSine; delay: 3000"
+                        position="0.4 0 0"
                         class="clickable"
                     >
-                        <a-text
-                            value="ℹ INFO"
-                            align="center"
-                            color="#000"
-                            width="2.5"
-                            position="0 0 0.03"
-                        ></a-text>
-                    </a-box>
-                    
-                    <!-- Pointer arrow to menu -->
-                    <a-cone
-                        position="0 -0.15 0"
-                        radius-bottom="0.08"
-                        radius-top="0"
-                        height="0.15"
-                        color="#fff"
-                        opacity="0"
-                        animation="property: opacity; to: 0.8; dur: 600; delay: 2400"
-                        animation__bob="property: position; to: 0 -0.2 0; dir: alternate; dur: 1000; loop: true; easing: easeInOutSine; delay: 3000"
-                    ></a-cone>
+                        <a-box
+                            width="0.7"
+                            height="0.25"
+                            depth="0.06"
+                            color="#fff"
+                            opacity="0"
+                            animation="property: opacity; to: 1; dur: 800; delay: 2200"
+                            animation__pulse="property: scale; to: 1.15 1.15 1.15; dir: alternate; dur: 1400; loop: true; easing: easeInOutSine; delay: 3000"
+                        >
+                            <a-text
+                                value="ℹ INFO"
+                                align="center"
+                                color="#000"
+                                width="2.8"
+                                position="0 0 0.035"
+                            ></a-text>
+                        </a-box>
+                    </a-entity>
                     
                 </a-entity>
                 
-                <!-- Info Panel - Modern card -->
+                <!-- Info Panel -->
                 <a-entity
                     id="info-panel"
-                    position="0 0.8 -0.3"
+                    position="0 1 -0.3"
                     visible="false"
                 >
-                    <!-- Panel background -->
                     <a-plane
-                        width="2.5"
-                        height="2"
+                        width="2.8"
+                        height="2.2"
                         color="#000"
                         opacity="0.95"
                     >
-                        <!-- Border -->
                         <a-plane
-                            width="2.55"
-                            height="2.05"
+                            width="2.85"
+                            height="2.25"
                             color="#fff"
                             opacity="0.3"
                             position="0 0 -0.01"
                         ></a-plane>
                     </a-plane>
                     
-                    <!-- Content -->
                     <a-text
                         value="SIMON PADRON"
                         align="center"
                         color="#fff"
-                        width="2.2"
-                        position="0 0.8 0.01"
+                        width="2.4"
+                        position="0 0.9 0.01"
                     ></a-text>
                     
                     <a-text
                         value="Filtration Engineer\nParker Hannifin PFIC"
                         align="center"
                         color="#ccc"
-                        width="2"
-                        position="0 0.55 0.01"
+                        width="2.2"
+                        position="0 0.6 0.01"
                         line-height="50"
                     ></a-text>
                     
@@ -307,49 +312,54 @@
                         value="Ph.D. Student | Membrane Science\n\nSpecializations:\n• Nanofiber Production\n• CFD/FEA Simulation\n• VR Visualization\n• Advanced Analytics"
                         align="center"
                         color="#fff"
-                        width="2.1"
-                        position="0 0.1 0.01"
+                        width="2.3"
+                        position="0 0.05 0.01"
                         line-height="48"
                     ></a-text>
                     
-                    <!-- LinkedIn Button - Larger -->
-                    <a-box
+                    <!-- LinkedIn Button -->
+                    <a-entity
                         id="linkedin-btn"
-                        position="0 -0.65 0.01"
-                        width="1.2"
-                        height="0.22"
-                        depth="0.04"
-                        color="#0077B5"
+                        position="0 -0.7 0.01"
                         class="clickable"
-                        animation__pulse="property: scale; to: 1.05 1.05 1.05; dir: alternate; dur: 1000; loop: true; easing: easeInOutSine"
                     >
-                        <a-text
-                            value="🔗 LINKEDIN"
-                            align="center"
-                            color="#fff"
-                            width="3"
-                            position="0 0 0.025"
-                        ></a-text>
-                    </a-box>
+                        <a-box
+                            width="1.4"
+                            height="0.25"
+                            depth="0.05"
+                            color="#0077B5"
+                        >
+                            <a-text
+                                value="🔗 LINKEDIN"
+                                align="center"
+                                color="#fff"
+                                width="3.5"
+                                position="0 0 0.03"
+                            ></a-text>
+                        </a-box>
+                    </a-entity>
                     
-                    <!-- Close button - Larger -->
-                    <a-box
+                    <!-- Close Button -->
+                    <a-entity
                         id="close-btn"
-                        position="1.1 0.85 0.01"
-                        width="0.2"
-                        height="0.2"
-                        depth="0.04"
-                        color="#fff"
+                        position="1.2 0.95 0.01"
                         class="clickable"
                     >
-                        <a-text
-                            value="✕"
-                            align="center"
-                            color="#000"
-                            width="2"
-                            position="0 0 0.025"
-                        ></a-text>
-                    </a-box>
+                        <a-box
+                            width="0.25"
+                            height="0.25"
+                            depth="0.05"
+                            color="#fff"
+                        >
+                            <a-text
+                                value="✕"
+                                align="center"
+                                color="#000"
+                                width="2.5"
+                                position="0 0 0.03"
+                            ></a-text>
+                        </a-box>
+                    </a-entity>
                 </a-entity>
                 
             </a-marker>
@@ -361,89 +371,89 @@
             const video = document.querySelector('#pfic_ar');
             const marker = document.querySelector('a-marker');
             const status = document.getElementById('status');
-            const playPrompt = document.getElementById('play-prompt');
+            const tapHint = document.getElementById('tap-hint');
             const infoPanel = document.querySelector('#info-panel');
-            const videoBtnText = document.querySelector('#video-btn-text');
+            const videoText = document.querySelector('#video-text');
             
             let videoPlaying = false;
             let infoPanelVisible = false;
-            let userInteracted = false;
             
-            // Marker detection
+            // Marker events
             marker.addEventListener('markerFound', () => {
-                console.log('✅ Marker detected!');
-                status.textContent = 'AR Active - Tap buttons above card';
+                console.log('✅ Marker found!');
+                status.textContent = 'AR Active - Tap buttons!';
+                
+                // Auto-start video
+                setTimeout(() => {
+                    if (!videoPlaying) {
+                        playVideo();
+                    }
+                }, 1000);
             });
             
             marker.addEventListener('markerLost', () => {
                 console.log('❌ Marker lost');
-                status.textContent = 'Point camera at marker';
+                status.textContent = 'Point at marker';
                 if (infoPanelVisible) {
-                    hideInfoPanel();
+                    hideInfo();
                 }
             });
             
-            // Play prompt click
-            playPrompt.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log('Play prompt clicked');
-                startVideo();
-            });
-            
-            function startVideo() {
-                if (video && !videoPlaying) {
-                    // Try with sound first
-                    video.muted = false;
-                    video.play().then(() => {
-                        videoPlaying = true;
-                        videoBtnText.setAttribute('value', '⏸ PAUSE');
-                        playPrompt.classList.add('hidden');
-                        userInteracted = true;
-                        console.log('✅ Video playing with sound');
-                    }).catch(e => {
-                        // If that fails, try muted
-                        console.log('Trying muted playback...');
-                        video.muted = true;
-                        video.play().then(() => {
-                            videoPlaying = true;
-                            videoBtnText.setAttribute('value', '⏸ PAUSE');
-                            playPrompt.classList.add('hidden');
-                            userInteracted = true;
-                            console.log('✅ Video playing muted');
-                        }).catch(e2 => {
-                            console.error('❌ Video play failed:', e2);
-                        });
+            // Play video function
+            function playVideo() {
+                console.log('Attempting to play video...');
+                video.play().then(() => {
+                    console.log('✅ Video playing!');
+                    videoPlaying = true;
+                    videoText.setAttribute('value', '⏸ PAUSE');
+                    tapHint.classList.add('hidden');
+                }).catch(e => {
+                    console.error('❌ Video play failed:', e);
+                    console.log('Video state:', {
+                        paused: video.paused,
+                        muted: video.muted,
+                        readyState: video.readyState,
+                        src: video.src
                     });
-                }
+                });
             }
             
-            // Video button click
-            document.querySelector('#video-btn').addEventListener('click', (e) => {
+            // Video button - using mousedown for better mobile support
+            const videoBtn = document.querySelector('#video-btn');
+            videoBtn.addEventListener('click', function(e) {
+                console.log('🎬 Video button CLICKED!');
                 e.stopPropagation();
-                console.log('Video button clicked');
                 
                 if (!videoPlaying) {
-                    startVideo();
+                    playVideo();
                 } else {
                     video.pause();
                     videoPlaying = false;
-                    videoBtnText.setAttribute('value', '▶ PLAY VIDEO');
-                    console.log('Video paused');
+                    videoText.setAttribute('value', '▶ PLAY');
+                    console.log('⏸ Video paused');
                 }
             });
             
-            // Info button click
-            document.querySelector('#info-btn').addEventListener('click', (e) => {
+            // Also try mousedown
+            videoBtn.addEventListener('mousedown', function(e) {
+                console.log('🎬 Video button MOUSEDOWN!');
+            });
+            
+            // Info button
+            const infoBtn = document.querySelector('#info-btn');
+            infoBtn.addEventListener('click', function(e) {
+                console.log('ℹ️ Info button CLICKED!');
                 e.stopPropagation();
-                console.log('Info button clicked');
+                
                 if (!infoPanelVisible) {
-                    showInfoPanel();
+                    showInfo();
                 } else {
-                    hideInfoPanel();
+                    hideInfo();
                 }
             });
             
-            function showInfoPanel() {
+            function showInfo() {
+                console.log('Showing info panel');
                 infoPanel.setAttribute('visible', true);
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
@@ -455,12 +465,12 @@
                 infoPanelVisible = true;
             }
             
-            function hideInfoPanel() {
+            function hideInfo() {
+                console.log('Hiding info panel');
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
                     to: '0.1 0.1 0.1',
-                    dur: 300,
-                    easing: 'easeInQuad'
+                    dur: 300
                 });
                 setTimeout(() => {
                     infoPanel.setAttribute('visible', false);
@@ -469,43 +479,44 @@
             }
             
             // Close button
-            document.querySelector('#close-btn').addEventListener('click', (e) => {
+            const closeBtn = document.querySelector('#close-btn');
+            closeBtn.addEventListener('click', function(e) {
+                console.log('✕ Close button clicked');
                 e.stopPropagation();
-                console.log('Close button clicked');
-                hideInfoPanel();
+                hideInfo();
             });
             
             // LinkedIn button
-            document.querySelector('#linkedin-btn').addEventListener('click', (e) => {
+            const linkedinBtn = document.querySelector('#linkedin-btn');
+            linkedinBtn.addEventListener('click', function(e) {
+                console.log('🔗 LinkedIn button clicked');
                 e.stopPropagation();
-                console.log('LinkedIn button clicked');
                 window.open('https://www.linkedin.com/in/simonpadron/', '_blank');
             });
             
-            // Tap anywhere to start video
+            // Tap screen to start video
             document.addEventListener('touchstart', (e) => {
-                if (!userInteracted && !e.target.closest('.clickable')) {
-                    console.log('Screen tapped');
-                    startVideo();
+                console.log('📱 Screen touched');
+                if (!videoPlaying) {
+                    playVideo();
                 }
-            }, { once: false });
+            });
             
-            // Video loading events
+            // Video events for debugging
             video.addEventListener('loadeddata', () => {
-                console.log('✅ Video loaded');
+                console.log('✅ Video loaded successfully');
             });
             
             video.addEventListener('error', (e) => {
-                console.error('❌ Video error:', e);
-                console.error('Video src:', video.src);
+                console.error('❌ Video error:', video.error);
             });
             
             video.addEventListener('play', () => {
-                console.log('🎬 Video playing');
+                console.log('▶️ Video play event fired');
             });
             
-            video.addEventListener('pause', () => {
-                console.log('⏸ Video paused');
+            video.addEventListener('playing', () => {
+                console.log('🎬 Video is playing');
             });
         </script>
     
