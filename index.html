@@ -204,172 +204,182 @@
                     gesture-handler
                 ></a-entity>
                 
-                <!-- INFO PANEL - Centered with Parker site as background -->
+                <!-- INFO PANEL - Centered with proper text positioning -->
                 <a-entity
                     id="info-panel"
                     position="0 0.25 0"
                     visible="false"
                 >
-                    <!-- Background panel - rotated flat -->
-                    <a-entity rotation="-90 0 0">
-                        <!-- Background image -->
-                        <a-image
-                            src="assets/PFIC_SITE.JPG"
-                            width="2.2"
-                            height="1.8"
-                            opacity="0.3"
-                        ></a-image>
-                        
-                        <!-- Dark overlay -->
-                        <a-plane
-                            width="2.2"
-                            height="1.8"
-                            color="#000"
-                            opacity="0"
-                            material="transparent: true; opacity: 0.75; side: double"
-                            position="0 0 0.001"
-                        >
-                            <!-- Border -->
-                            <a-plane
-                                width="2.26"
-                                height="1.86"
-                                color="#fff"
-                                opacity="0.3"
-                                position="0 0 0.001"
-                                material="side: double"
-                            ></a-plane>
-                        </a-plane>
-                    </a-entity>
+                    <!-- Background image - flat on card -->
+                    <a-image
+                        src="assets/PFIC_SITE.JPG"
+                        width="2.2"
+                        height="1.8"
+                        rotation="-90 0 0"
+                        position="0 0 0"
+                        opacity="0.3"
+                    ></a-image>
                     
-                    <!-- Text content - also rotated flat to face up -->
-                    <a-entity rotation="-90 0 0" position="0 0.002 0">
-                        <!-- Name -->
-                        <a-text
-                            value="SIMON PADRON"
-                            align="center"
-                            color="#fff"
-                            width="1.8"
-                            position="0 0 0.75"
-                        ></a-text>
-                        
-                        <!-- Title -->
-                        <a-text
-                            value="Technology Leader"
-                            align="center"
-                            color="#ddd"
-                            width="1.6"
-                            position="0 0 0.55"
-                        ></a-text>
-                        
-                        <!-- Company -->
-                        <a-text
-                            value="Parker Hannifin PFIC"
-                            align="center"
-                            color="#bbb"
-                            width="1.6"
-                            position="0 0 0.4"
-                        ></a-text>
-                        
-                        <!-- Divider 1 -->
+                    <!-- Dark overlay - flat on card, just above background -->
+                    <a-plane
+                        width="2.2"
+                        height="1.8"
+                        color="#000"
+                        rotation="-90 0 0"
+                        position="0 0.001 0"
+                        opacity="0"
+                        material="transparent: true; opacity: 0.75; side: double"
+                    >
+                        <!-- Border -->
                         <a-plane
-                            width="1.8"
-                            height="0.008"
+                            width="2.26"
+                            height="1.86"
                             color="#fff"
                             opacity="0.3"
-                            position="0 0.001 0.25"
+                            position="0 0.001 0"
+                            material="side: double"
                         ></a-plane>
-                        
-                        <!-- Education -->
-                        <a-text
-                            value="Ph.D. Student"
-                            align="center"
-                            color="#fff"
-                            width="1.5"
-                            position="0 0 0.12"
-                        ></a-text>
-                        
-                        <a-text
-                            value="Texas A&M"
-                            align="center"
-                            color="#ccc"
-                            width="1.4"
-                            position="0 0 -0.02"
-                        ></a-text>
-                        
-                        <!-- Divider 2 -->
-                        <a-plane
-                            width="1.8"
-                            height="0.008"
-                            color="#fff"
-                            opacity="0.3"
-                            position="0 0.001 -0.16"
-                        ></a-plane>
-                        
-                        <!-- Specializations header -->
-                        <a-text
-                            value="Specializations"
-                            align="center"
-                            color="#fff"
-                            width="1.5"
-                            position="0 0 -0.28"
-                        ></a-text>
-                        
-                        <!-- Specializations line 1 -->
-                        <a-text
-                            value="Filtration R&D • AI • Simulation"
-                            align="center"
-                            color="#aaa"
-                            width="1.9"
-                            position="0 0 -0.42"
-                        ></a-text>
-                        
-                        <!-- Specializations line 2 -->
-                        <a-text
-                            value="AR/VR • Analytics"
-                            align="center"
-                            color="#aaa"
-                            width="1.6"
-                            position="0 0 -0.55"
-                        ></a-text>
-                        
-                        <!-- Divider 3 -->
-                        <a-plane
-                            width="1.8"
-                            height="0.008"
-                            color="#fff"
-                            opacity="0.3"
-                            position="0 0.001 -0.68"
-                        ></a-plane>
-                    </a-entity>
+                    </a-plane>
                     
-                    <!-- LinkedIn Button - also rotated flat -->
-                    <a-entity rotation="-90 0 0" position="0 0.002 0">
+                    <!-- All text - Y=0.01 for visibility, Z controls vertical position on card -->
+                    
+                    <!-- Name - at top -->
+                    <a-text
+                        value="SIMON PADRON"
+                        align="center"
+                        color="#fff"
+                        width="1.8"
+                        rotation="-90 0 0"
+                        position="0 0.01 -0.7"
+                    ></a-text>
+                    
+                    <!-- Title -->
+                    <a-text
+                        value="Technology Leader"
+                        align="center"
+                        color="#ddd"
+                        width="1.6"
+                        rotation="-90 0 0"
+                        position="0 0.01 -0.5"
+                    ></a-text>
+                    
+                    <!-- Company -->
+                    <a-text
+                        value="Parker Hannifin PFIC"
+                        align="center"
+                        color="#bbb"
+                        width="1.6"
+                        rotation="-90 0 0"
+                        position="0 0.01 -0.35"
+                    ></a-text>
+                    
+                    <!-- Divider 1 -->
+                    <a-plane
+                        width="1.8"
+                        height="0.008"
+                        color="#fff"
+                        opacity="0.3"
+                        rotation="-90 0 0"
+                        position="0 0.01 -0.18"
+                    ></a-plane>
+                    
+                    <!-- Education line 1 -->
+                    <a-text
+                        value="Ph.D. Student"
+                        align="center"
+                        color="#fff"
+                        width="1.5"
+                        rotation="-90 0 0"
+                        position="0 0.01 -0.05"
+                    ></a-text>
+                    
+                    <!-- Education line 2 -->
+                    <a-text
+                        value="Texas A&M"
+                        align="center"
+                        color="#ccc"
+                        width="1.4"
+                        rotation="-90 0 0"
+                        position="0 0.01 0.08"
+                    ></a-text>
+                    
+                    <!-- Divider 2 -->
+                    <a-plane
+                        width="1.8"
+                        height="0.008"
+                        color="#fff"
+                        opacity="0.3"
+                        rotation="-90 0 0"
+                        position="0 0.01 0.22"
+                    ></a-plane>
+                    
+                    <!-- Specializations header -->
+                    <a-text
+                        value="Specializations"
+                        align="center"
+                        color="#fff"
+                        width="1.5"
+                        rotation="-90 0 0"
+                        position="0 0.01 0.35"
+                    ></a-text>
+                    
+                    <!-- Specializations line 1 -->
+                    <a-text
+                        value="Filtration R&D • AI • Simulation"
+                        align="center"
+                        color="#aaa"
+                        width="1.9"
+                        rotation="-90 0 0"
+                        position="0 0.01 0.48"
+                    ></a-text>
+                    
+                    <!-- Specializations line 2 -->
+                    <a-text
+                        value="AR/VR • Analytics"
+                        align="center"
+                        color="#aaa"
+                        width="1.6"
+                        rotation="-90 0 0"
+                        position="0 0.01 0.6"
+                    ></a-text>
+                    
+                    <!-- Divider 3 -->
+                    <a-plane
+                        width="1.8"
+                        height="0.008"
+                        color="#fff"
+                        opacity="0.3"
+                        rotation="-90 0 0"
+                        position="0 0.01 0.72"
+                    ></a-plane>
+                    
+                    <!-- LinkedIn Button - at bottom -->
+                    <a-plane
+                        id="linkedin-btn"
+                        position="0 0.01 0.83"
+                        rotation="-90 0 0"
+                        width="1.5"
+                        height="0.18"
+                        color="#0077B5"
+                        opacity="1"
+                        class="clickable"
+                    >
                         <a-plane
-                            id="linkedin-btn"
-                            position="0 0 -0.82"
-                            width="1.5"
-                            height="0.2"
+                            position="0 0.001 0"
+                            width="1.55"
+                            height="0.22"
                             color="#0077B5"
-                            opacity="1"
-                            class="clickable"
-                        >
-                            <a-plane
-                                position="0 -0.002 0"
-                                width="1.55"
-                                height="0.24"
-                                color="#0077B5"
-                                opacity="0.3"
-                            ></a-plane>
-                            
-                            <a-text
-                                value="CONNECT ON LINKEDIN"
-                                align="center"
-                                color="#fff"
-                                width="3.5"
-                                position="0 0.002 0"
-                            ></a-text>
-                        </a-plane>
-                    </a-entity>
+                            opacity="0.3"
+                        ></a-plane>
+                        
+                        <a-text
+                            value="CONNECT ON LINKEDIN"
+                            align="center"
+                            color="#fff"
+                            width="3.5"
+                            position="0 0.002 0"
+                        ></a-text>
+                    </a-plane>
                     
                 </a-entity>
                 
@@ -476,89 +486,92 @@
                     easing: 'easeOutBack'
                 });
                 
-                // Move Simon's photo right
-                const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
-                if (simonPhoto) {
-                    simonPhoto.setAttribute('animation__move', {
-                        property: 'position',
-                        to: '1.9 0.25 -.1',
-                        dur: 500,
-                        easing: 'easeOutQuad'
-                    });
-                }
+                // POPUP BOUNDS: X(-1.1 to 1.1), Z(-0.9 to 0.9)
+                // Move all elements OUTSIDE these bounds
                 
-                // Move Simon's name right
-                const simonName = document.querySelector('a-image[src="assets/simon-name.png"]');
-                if (simonName) {
-                    simonName.setAttribute('animation__move', {
-                        property: 'position',
-                        to: '1.9 0.23 .35',
-                        dur: 500,
-                        easing: 'easeOutQuad'
-                    });
-                }
-                
-                // Move video plane left
+                // Video - from center (0,0) to far left/top
                 const video = document.querySelector('a-plane[material*="pfic_ar"]');
                 if (video) {
                     video.setAttribute('animation__move', {
                         property: 'position',
-                        to: '-0.5 0.25 0.5',
+                        to: '-1.5 0.25 -1.2',
                         dur: 500,
                         easing: 'easeOutQuad'
                     });
                 }
                 
-                // Move Parker logo left
+                // Simon's photo - move right and up (outside right/top)
+                const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
+                if (simonPhoto) {
+                    simonPhoto.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.8 0.25 -1.2',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Simon's name - move right (outside right edge)
+                const simonName = document.querySelector('a-image[src="assets/simon-name.png"]');
+                if (simonName) {
+                    simonName.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.8 0.23 0.3',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Parker logo - move far left/top (outside left/top)
                 const parkerLogo = document.querySelector('a-image[src="assets/parker-logo.jpg"]');
                 if (parkerLogo) {
                     parkerLogo.setAttribute('animation__move', {
                         property: 'position',
-                        to: '-0.9 0.23 -.62',
+                        to: '-1.5 0.23 -1.2',
                         dur: 500,
                         easing: 'easeOutQuad'
                     });
                 }
                 
-                // Move PFIC name left
+                // PFIC name - move left/top (outside left/top)
                 const pficName = document.querySelector('a-image[src="assets/pfic-name.png"]');
                 if (pficName) {
                     pficName.setAttribute('animation__move', {
                         property: 'position',
-                        to: '-0.5 0.24 -.60',
+                        to: '-1.4 0.24 -1.1',
                         dur: 500,
                         easing: 'easeOutQuad'
                     });
                 }
                 
-                // Move Parker 2 image left and back
+                // Parker 2 - move far left/bottom (outside left/bottom)
                 const parker2 = document.querySelector('a-image[src="assets/parker_2.jpg"]');
                 if (parker2) {
                     parker2.setAttribute('animation__move', {
                         property: 'position',
-                        to: '-0.8 0.24 1',
+                        to: '-1.5 0.24 1.2',
                         dur: 500,
                         easing: 'easeOutQuad'
                     });
                 }
                 
-                // Move spinneret model right
+                // Spinneret - move right/bottom (outside right/bottom)
                 const spinneret = document.querySelector('#spinneret-stress');
                 if (spinneret) {
                     spinneret.setAttribute('animation__move', {
                         property: 'position',
-                        to: '1.7 0.4 1.2',
+                        to: '1.8 0.4 1.3',
                         dur: 500,
                         easing: 'easeOutQuad'
                     });
                 }
                 
-                // Move filter model left
+                // Filter - move down (outside bottom)
                 const filter = document.querySelector('#Parker_filter_2');
                 if (filter) {
                     filter.setAttribute('animation__move', {
                         property: 'position',
-                        to: '-0.8 0.35 1',
+                        to: '0.5 0.35 1.3',
                         dur: 500,
                         easing: 'easeOutQuad'
                     });
@@ -598,7 +611,7 @@
                     dur: 300
                 });
                 
-                // Move all elements back to original positions
+                // Return Simon's photo to original position
                 const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
                 if (simonPhoto) {
                     simonPhoto.setAttribute('animation__move', {
@@ -609,6 +622,7 @@
                     });
                 }
                 
+                // Return Simon's name
                 const simonName = document.querySelector('a-image[src="assets/simon-name.png"]');
                 if (simonName) {
                     simonName.setAttribute('animation__move', {
@@ -619,6 +633,7 @@
                     });
                 }
                 
+                // Return video to center
                 const video = document.querySelector('a-plane[material*="pfic_ar"]');
                 if (video) {
                     video.setAttribute('animation__move', {
@@ -629,6 +644,7 @@
                     });
                 }
                 
+                // Return Parker logo
                 const parkerLogo = document.querySelector('a-image[src="assets/parker-logo.jpg"]');
                 if (parkerLogo) {
                     parkerLogo.setAttribute('animation__move', {
@@ -639,6 +655,7 @@
                     });
                 }
                 
+                // Return PFIC name
                 const pficName = document.querySelector('a-image[src="assets/pfic-name.png"]');
                 if (pficName) {
                     pficName.setAttribute('animation__move', {
@@ -649,6 +666,7 @@
                     });
                 }
                 
+                // Return Parker 2
                 const parker2 = document.querySelector('a-image[src="assets/parker_2.jpg"]');
                 if (parker2) {
                     parker2.setAttribute('animation__move', {
@@ -659,6 +677,7 @@
                     });
                 }
                 
+                // Return spinneret
                 const spinneret = document.querySelector('#spinneret-stress');
                 if (spinneret) {
                     spinneret.setAttribute('animation__move', {
@@ -669,6 +688,7 @@
                     });
                 }
                 
+                // Return filter
                 const filter = document.querySelector('#Parker_filter_2');
                 if (filter) {
                     filter.setAttribute('animation__move', {
