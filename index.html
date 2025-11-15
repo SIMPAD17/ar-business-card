@@ -72,7 +72,7 @@
 
     <body>
         <div id="status">Point camera at marker</div>
-        <div id="tap-instruction">TAP SCREEN FOR INFO</div>
+        <div id="tap-instruction">TAP FOR INFO</div>
 
         <a-scene
             vr-mode-ui="enabled: false"
@@ -207,144 +207,169 @@
                 <!-- INFO PANEL - Centered with Parker site as background -->
                 <a-entity
                     id="info-panel"
-                    position="0 0.3 0"
-                    rotation="-90 0 0"
+                    position="0 0.25 0"
                     visible="false"
                 >
-                    <!-- Background image -->
-                    <a-image
-                        src="assets/PFIC_SITE.JPG"
-                        width="2.2"
-                        height="1.8"
-                        opacity="0.3"
-                    ></a-image>
-                    
-                    <!-- Dark overlay -->
-                    <a-plane
-                        width="2.2"
-                        height="1.8"
-                        color="#000"
-                        opacity="0"
-                        material="transparent: true; opacity: 0.75; side: double"
-                        position="0 0 0.001"
-                    >
-                        <!-- Border -->
-                        <a-plane
-                            width="2.26"
-                            height="1.86"
-                            color="#fff"
+                    <!-- Background panel - rotated flat -->
+                    <a-entity rotation="-90 0 0">
+                        <!-- Background image -->
+                        <a-image
+                            src="assets/PFIC_SITE.JPG"
+                            width="2.2"
+                            height="1.8"
                             opacity="0.3"
-                            position="0 0 -0.001"
-                            material="side: double"
-                        ></a-plane>
-                    </a-plane>
+                        ></a-image>
+                        
+                        <!-- Dark overlay -->
+                        <a-plane
+                            width="2.2"
+                            height="1.8"
+                            color="#000"
+                            opacity="0"
+                            material="transparent: true; opacity: 0.75; side: double"
+                            position="0 0 0.001"
+                        >
+                            <!-- Border -->
+                            <a-plane
+                                width="2.26"
+                                height="1.86"
+                                color="#fff"
+                                opacity="0.3"
+                                position="0 0 0.001"
+                                material="side: double"
+                            ></a-plane>
+                        </a-plane>
+                    </a-entity>
                     
-                    <!-- Content positioned in 2D space (X, Z) since rotated -->
-                    <a-entity position="0 0.01 0">
+                    <!-- Text content - also rotated flat to face up -->
+                    <a-entity rotation="-90 0 0" position="0 0.002 0">
+                        <!-- Name -->
                         <a-text
                             value="SIMON PADRON"
                             align="center"
                             color="#fff"
-                            width="1.6"
+                            width="1.8"
                             position="0 0 0.75"
-                            letter-spacing="1"
                         ></a-text>
                         
+                        <!-- Title -->
                         <a-text
-                            value="Filtration Engineer"
+                            value="Technology Leader"
                             align="center"
                             color="#ddd"
-                            width="1.5"
+                            width="1.6"
                             position="0 0 0.55"
                         ></a-text>
                         
+                        <!-- Company -->
                         <a-text
                             value="Parker Hannifin PFIC"
                             align="center"
                             color="#bbb"
-                            width="1.5"
+                            width="1.6"
                             position="0 0 0.4"
                         ></a-text>
                         
+                        <!-- Divider 1 -->
                         <a-plane
                             width="1.8"
-                            height="0.005"
+                            height="0.008"
                             color="#fff"
                             opacity="0.3"
-                            position="0 0.0005 0.25"
-                            material="side: double"
+                            position="0 0.001 0.25"
                         ></a-plane>
                         
+                        <!-- Education -->
                         <a-text
                             value="Ph.D. Student"
                             align="center"
                             color="#fff"
-                            width="1.4"
-                            position="0 0 0.1"
+                            width="1.5"
+                            position="0 0 0.12"
                         ></a-text>
                         
                         <a-text
-                            value="Membrane Science"
+                            value="Texas A&M"
                             align="center"
                             color="#ccc"
                             width="1.4"
-                            position="0 0 -0.05"
+                            position="0 0 -0.02"
                         ></a-text>
                         
+                        <!-- Divider 2 -->
+                        <a-plane
+                            width="1.8"
+                            height="0.008"
+                            color="#fff"
+                            opacity="0.3"
+                            position="0 0.001 -0.16"
+                        ></a-plane>
+                        
+                        <!-- Specializations header -->
                         <a-text
                             value="Specializations"
                             align="center"
                             color="#fff"
-                            width="1.3"
-                            position="0 0 -0.25"
+                            width="1.5"
+                            position="0 0 -0.28"
                         ></a-text>
                         
+                        <!-- Specializations line 1 -->
                         <a-text
-                            value="Nanofiber • CFD/FEA"
+                            value="Filtration R&D • AI • Simulation"
+                            align="center"
+                            color="#aaa"
+                            width="1.9"
+                            position="0 0 -0.42"
+                        ></a-text>
+                        
+                        <!-- Specializations line 2 -->
+                        <a-text
+                            value="AR/VR • Analytics"
                             align="center"
                             color="#aaa"
                             width="1.6"
-                            position="0 0 -0.4"
+                            position="0 0 -0.55"
                         ></a-text>
                         
-                        <a-text
-                            value="VR • Analytics"
-                            align="center"
-                            color="#aaa"
-                            width="1.4"
-                            position="0 0 -0.53"
-                        ></a-text>
+                        <!-- Divider 3 -->
+                        <a-plane
+                            width="1.8"
+                            height="0.008"
+                            color="#fff"
+                            opacity="0.3"
+                            position="0 0.001 -0.68"
+                        ></a-plane>
                     </a-entity>
                     
-                    <!-- LinkedIn Button -->
-                    <a-plane
-                        id="linkedin-btn"
-                        position="0 0.01 -0.78"
-                        width="1.4"
-                        height="0.22"
-                        color="#0077B5"
-                        opacity="1"
-                        material="side: double"
-                        class="clickable"
-                    >
+                    <!-- LinkedIn Button - also rotated flat -->
+                    <a-entity rotation="-90 0 0" position="0 0.002 0">
                         <a-plane
-                            position="0 -0.003 0"
-                            width="1.45"
-                            height="0.27"
+                            id="linkedin-btn"
+                            position="0 0 -0.82"
+                            width="1.5"
+                            height="0.2"
                             color="#0077B5"
-                            opacity="0.3"
-                            material="side: double"
-                        ></a-plane>
-                        
-                        <a-text
-                            value="CONNECT ON LINKEDIN"
-                            align="center"
-                            color="#fff"
-                            width="3.2"
-                            position="0 0.005 0"
-                            letter-spacing="0.5"
-                        ></a-text>
-                    </a-plane>
+                            opacity="1"
+                            class="clickable"
+                        >
+                            <a-plane
+                                position="0 -0.002 0"
+                                width="1.55"
+                                height="0.24"
+                                color="#0077B5"
+                                opacity="0.3"
+                            ></a-plane>
+                            
+                            <a-text
+                                value="CONNECT ON LINKEDIN"
+                                align="center"
+                                color="#fff"
+                                width="3.5"
+                                position="0 0.002 0"
+                            ></a-text>
+                        </a-plane>
+                    </a-entity>
                     
                 </a-entity>
                 
@@ -420,15 +445,29 @@
                 console.log('📱 Opening info panel...');
                 infoPanel.setAttribute('visible', true);
                 
-                const panel = infoPanel.querySelector('a-plane');
-                panel.setAttribute('animation', {
-                    property: 'material.opacity',
-                    from: 0,
-                    to: 0.75,
-                    dur: 500,
-                    easing: 'easeOutQuad'
-                });
+                // Fade in background
+                const bgImage = infoPanel.querySelector('a-image');
+                if (bgImage) {
+                    bgImage.setAttribute('animation', {
+                        property: 'opacity',
+                        from: 0,
+                        to: 0.3,
+                        dur: 500
+                    });
+                }
                 
+                const overlay = infoPanel.querySelector('a-plane[color="#000"]');
+                if (overlay) {
+                    overlay.setAttribute('animation', {
+                        property: 'material.opacity',
+                        from: 0,
+                        to: 0.75,
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Scale in panel
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
                     from: '0.7 0.7 0.7',
@@ -437,48 +476,122 @@
                     easing: 'easeOutBack'
                 });
                 
-                // Move elements to make space for centered panel
+                // Move Simon's photo right
                 const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
-                simonPhoto.setAttribute('animation__move', {
-                    property: 'position',
-                    to: '1.8 0.25 -.1',
-                    dur: 500,
-                    easing: 'easeOutQuad'
-                });
+                if (simonPhoto) {
+                    simonPhoto.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.9 0.25 -.1',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
                 
-                // Move parker logo left
+                // Move Simon's name right
+                const simonName = document.querySelector('a-image[src="assets/simon-name.png"]');
+                if (simonName) {
+                    simonName.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.9 0.23 .35',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Move video plane left
+                const video = document.querySelector('a-plane[material*="pfic_ar"]');
+                if (video) {
+                    video.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-0.5 0.25 0.5',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Move Parker logo left
                 const parkerLogo = document.querySelector('a-image[src="assets/parker-logo.jpg"]');
-                parkerLogo.setAttribute('animation__move', {
-                    property: 'position',
-                    to: '-.8 0.23 -.62',
-                    dur: 500,
-                    easing: 'easeOutQuad'
-                });
+                if (parkerLogo) {
+                    parkerLogo.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-0.9 0.23 -.62',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
                 
                 // Move PFIC name left
                 const pficName = document.querySelector('a-image[src="assets/pfic-name.png"]');
-                pficName.setAttribute('animation__move', {
-                    property: 'position',
-                    to: '-.3 0.24 -.60',
-                    dur: 500,
-                    easing: 'easeOutQuad'
-                });
+                if (pficName) {
+                    pficName.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-0.5 0.24 -.60',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Move Parker 2 image left and back
+                const parker2 = document.querySelector('a-image[src="assets/parker_2.jpg"]');
+                if (parker2) {
+                    parker2.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-0.8 0.24 1',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Move spinneret model right
+                const spinneret = document.querySelector('#spinneret-stress');
+                if (spinneret) {
+                    spinneret.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.7 0.4 1.2',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+                
+                // Move filter model left
+                const filter = document.querySelector('#Parker_filter_2');
+                if (filter) {
+                    filter.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-0.8 0.35 1',
+                        dur: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
                 
                 infoPanelVisible = true;
-                tapInstruction.textContent = 'TAP SCREEN TO CLOSE';
+                tapInstruction.textContent = 'TAP TO CLOSE';
                 status.textContent = 'Viewing info';
             }
             
             function hideInfo() {
                 console.log('📱 Closing info panel...');
                 
-                const panel = infoPanel.querySelector('a-plane');
-                panel.setAttribute('animation', {
-                    property: 'material.opacity',
-                    to: 0,
-                    dur: 300
-                });
+                // Fade out
+                const overlay = infoPanel.querySelector('a-plane[color="#000"]');
+                if (overlay) {
+                    overlay.setAttribute('animation', {
+                        property: 'material.opacity',
+                        to: 0,
+                        dur: 300
+                    });
+                }
                 
+                const bgImage = infoPanel.querySelector('a-image');
+                if (bgImage) {
+                    bgImage.setAttribute('animation', {
+                        property: 'opacity',
+                        to: 0,
+                        dur: 300
+                    });
+                }
+                
+                // Scale out
                 infoPanel.setAttribute('animation', {
                     property: 'scale',
                     to: '0.7 0.7 0.7',
@@ -487,35 +600,91 @@
                 
                 // Move all elements back to original positions
                 const simonPhoto = document.querySelector('a-image[src="assets/simon.JPG"]');
-                simonPhoto.setAttribute('animation__move', {
-                    property: 'position',
-                    to: '1.3 0.25 -.1',
-                    dur: 300,
-                    easing: 'easeInQuad'
-                });
+                if (simonPhoto) {
+                    simonPhoto.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.3 0.25 -.1',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
+                
+                const simonName = document.querySelector('a-image[src="assets/simon-name.png"]');
+                if (simonName) {
+                    simonName.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.32 0.23 .35',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
+                
+                const video = document.querySelector('a-plane[material*="pfic_ar"]');
+                if (video) {
+                    video.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '0 0.25 0',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
                 
                 const parkerLogo = document.querySelector('a-image[src="assets/parker-logo.jpg"]');
-                parkerLogo.setAttribute('animation__move', {
-                    property: 'position',
-                    to: '-.42 0.23 -.62',
-                    dur: 300,
-                    easing: 'easeInQuad'
-                });
+                if (parkerLogo) {
+                    parkerLogo.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-.42 0.23 -.62',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
                 
                 const pficName = document.querySelector('a-image[src="assets/pfic-name.png"]');
-                pficName.setAttribute('animation__move', {
-                    property: 'position',
-                    to: '1 0.24 -.60',
-                    dur: 300,
-                    easing: 'easeInQuad'
-                });
+                if (pficName) {
+                    pficName.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1 0.24 -.60',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
+                
+                const parker2 = document.querySelector('a-image[src="assets/parker_2.jpg"]');
+                if (parker2) {
+                    parker2.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '-.3 0.24 .75',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
+                
+                const spinneret = document.querySelector('#spinneret-stress');
+                if (spinneret) {
+                    spinneret.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '1.3 0.4 .9',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
+                
+                const filter = document.querySelector('#Parker_filter_2');
+                if (filter) {
+                    filter.setAttribute('animation__move', {
+                        property: 'position',
+                        to: '0.6 0.35 .75',
+                        dur: 300,
+                        easing: 'easeInQuad'
+                    });
+                }
                 
                 setTimeout(() => {
                     infoPanel.setAttribute('visible', false);
                 }, 300);
                 
                 infoPanelVisible = false;
-                tapInstruction.textContent = 'TAP SCREEN FOR INFO';
+                tapInstruction.textContent = 'TAP FOR INFO';
                 status.textContent = 'AR Active';
             }
             
