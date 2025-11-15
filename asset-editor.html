@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Asset Editor - General Purpose</title>
+    <!-- 3D Preview Libraries -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-orbit-controls-component/dist/aframe-orbit-controls-component.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 480px;
+            background: #252526;
+            border-right: 1px solid #3e3e42;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .viewport {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .top-controls {
+            background: #2d2d30;
+            border-bottom: 1px solid #3e3e42;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            background: #0e639c;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1177bb;
+        }
+
+        button.secondary {
+            background: #3e3e42;
+            color: #cccccc;
+        }
+
+        button.secondary:hover {
+            background: #4a4a4d;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        #assetsList {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #assetsList::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #assetsList::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        #assetsList::-webkit-scrollbar-thumb {
+            background: #3e3e42;
+            border-radius: 4px;
+        }
+
+        #assetsList::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4d;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #4ec9b0;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .asset-item {
+            background: #2d2d30;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .asset-header {
+            background: #1e1e1e;
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .asset-header:hover {
+            background: #2d2d30;
+        }
+
+        .asset-header.expanded {
+            background: #2d2d30;
+        }
+
+        .asset-preview {
+            width: 40px;
+            height: 40px;
+            background: #3c3c3c;
+            border-radius: 3px;
+            margin-right: 12px;
+            border: 1px solid #3e3e42;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .asset-preview img,
+        .asset-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .asset-preview.icon {
+            font-size: 20px;
+            color: #858585;
+        }
+
+        .asset-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .asset-name {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .asset-toggle {
+            color: #858585;
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+
+        .asset-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .asset-content {
+            display: none;
+            padding: 12px;
+            background: #1e1e1e;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .asset-content.expanded {
+            display: block;
+        }
+
+        .coord-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .coord-label {
+            width: 30px;
+            font-weight: 500;
+            color: #9cdcfe;
+        }
+
+        .coord-input {
+            flex: 1;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
+            color: #cccccc;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 0 6px;
+        }
+
+        .coord-input:focus {
+            outline: none;
+            border-color: #0e639c;
+            background: #1e1e1e;
+        }
+
+        .coord-value {
+            width: 45px;
+            text-align: right;
+            color: #b4cea8;
+            font-family: 'Consolas', monospace;
+        }
+
+        .asset-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .asset-actions button {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 11px;
+        }
+
+        button.danger {
+            background: #d16969;
+        }
+
+        button.danger:hover {
+            background: #e07f7f;
+        }
+
+        .add-asset-btn {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        a-scene#previewScene {
+            width: 100%;
+            height: 100%;
+        }
+
+        .viewer-toolbar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 6px;
+            z-index: 5;
+            background: rgba(45,45,48,0.85);
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            padding: 6px;
+            backdrop-filter: blur(6px);
+        }
+
+        .viewer-toolbar button {
+            padding: 6px 10px;
+            font-size: 12px;
+            background: #3e3e42;
+        }
+
+        .viewer-toolbar button:hover {
+            background: #4a4a4d;
+        }
+
+        .file-info {
+            font-size: 11px;
+            color: #858585;
+            padding: 8px 12px;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #4ec9b0;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #cccccc;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
+            color: #cccccc;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0e639c;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .form-actions button {
+            flex: 1;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-bottom: 1px solid #3e3e42;
+            background: #2d2d30;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: #cccccc;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #4ec9b0;
+            border-bottom-color: #4ec9b0;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 12px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: #3c3c3c;
+            border: 1px solid #3e3e42;
+            color: #cccccc;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #0e639c;
+        }
+
+        .export-options {
+            background: #2d2d30;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .export-options label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .export-options input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .success-message {
+            color: #b4cea8;
+            background: #1e3a1f;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="file-info" id="fileInfo">New Project</div>
+            
+            <div class="top-controls">
+                <button onclick="newProject()">New</button>
+                <button class="secondary" onclick="openProject()">Open</button>
+                <button class="secondary" onclick="loadExample()">Load Example</button>
+                <button class="secondary" onclick="saveProject()">Save</button>
+                <div style="margin-left:auto; display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:12px; color:#cccccc;">Frame:</span>
+                    <select id="frameSelect" onchange="setActiveFrame(this.value)" style="background:#3c3c3c; color:#ccc; border:1px solid #3e3e42; border-radius:4px; padding:4px 8px; font-size:12px;"></select>
+                    <button class="secondary" onclick="addFramePrompt()">+ Frame</button>
+                    <button class="secondary" onclick="saveFrame()">Save Frame</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('assets')">Assets</button>
+                <button class="tab" onclick="switchTab('export')">Export</button>
+            </div>
+
+            <div id="assets-tab" class="tab-content active">
+                <div class="sidebar-content">
+                    <button class="add-asset-btn" onclick="showAddAssetModal()">+ Add Asset</button>
+                    <div id="assetsList"></div>
+                </div>
+            </div>
+
+            <div id="export-tab" class="tab-content">
+                <div class="sidebar-content">
+                    <div class="export-options">
+                        <label>
+                            <input type="checkbox" id="exportIncludeAnimations" checked> Include Animations
+                        </label>
+                        <label>
+                            <input type="checkbox" id="exportIncludeUI" checked> Include UI Elements
+                        </label>
+                    </div>
+                    <button onclick="exportConfig()" style="width: 100%; margin-bottom: 8px;">Export JSON Config</button>
+                    <button onclick="generateIndex()" style="width: 100%;">Generate index.html</button>
+                    <div class="success-message" id="successMessage"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Viewport -->
+        <div class="viewport">
+            <div class="viewer-toolbar">
+                <button class="secondary" onclick="setView('top')">Top</button>
+                <button class="secondary" onclick="setView('perspective')">Perspective</button>
+                <button class="secondary" onclick="resetView()">Reset</button>
+                <button class="secondary" onclick="toggleGrid()">Grid</button>
+            </div>
+        <a-scene id="previewScene" embedded renderer="antialias: true; colorManagement: true;">
+                                <a-assets id="aframe-assets">
+                                        <img id="gridTex" crossorigin="anonymous" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' fill='%23161616'/><path d='M0 0 H64 M0 0 V64' stroke='%23333333' stroke-width='1'/></svg>">
+                                </a-assets>
+
+                <!-- Lighting -->
+                <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
+                <a-entity light="type: directional; color: #ffffff; intensity: 0.9" position="2 4 2"></a-entity>
+
+                <!-- Grid and Axes -->
+                <a-plane id="gridPlane" rotation="-90 0 0" position="0 0 0" width="8" height="8" 
+                         material="src: #gridTex; repeat: 40 40; transparent: true; metalness: 0; roughness: 1"></a-plane>
+                <!-- Business card outline container (drawn via lines in JS) -->
+                <a-entity id="cardOutline"></a-entity>
+                <a-entity id="axes">
+                    <!-- X (red) -->
+                    <a-cylinder position="1 0.02 0" rotation="0 0 90" radius="0.01" height="2" color="#ff4d4d"></a-cylinder>
+                    <!-- Y (green) -->
+                    <a-cylinder position="0 1 0" rotation="0 0 0" radius="0.01" height="2" color="#4dff4d"></a-cylinder>
+                    <!-- Z (blue) -->
+                    <a-cylinder position="0 0.02 1" rotation="90 0 0" radius="0.01" height="2" color="#4d8aff"></a-cylinder>
+                </a-entity>
+
+                <!-- Assets container -->
+                <a-entity id="assets-container"></a-entity>
+
+                <!-- Cameras -->
+                <a-entity id="cameraWrapper">
+                    <!-- Perspective camera with orbit controls -->
+                    <a-entity id="editorCamera"
+                              camera="active: true; projection: perspective; near: 0.01; far: 100; fov: 50"
+                              look-controls="enabled: false"
+                              position="1.2 1.2 1.8"
+                              orbit-controls="target: 0 0 0; enableZoom: true; minDistance: 0.05; maxDistance: 50; enableDamping: true; dampingFactor: 0.1; rotateSpeed: 0.3; zoomSpeed: 0.5; panSpeed: 0.5;">
+                    </a-entity>
+
+                    <!-- Orthographic top camera (true overhead, no tilt) -->
+                    <a-entity id="topCamera"
+                              camera="active: false; projection: orthographic; near: 0.01; far: 100; zoom: 2"
+                              look-controls="enabled: false"
+                              position="0 6 0"
+                              rotation="-90 0 0">
+                    </a-entity>
+                </a-entity>
+
+                <!-- Mouse cursor for clicking 3D UI (e.g., LinkedIn button) -->
+                <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
+
+            </a-scene>
+        </div>
+    </div>
+
+    <!-- Add Asset Modal -->
+    <div id="addAssetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Add New Asset</div>
+            <div class="form-group">
+                <label>Asset Name *</label>
+                <input type="text" id="assetNameInput" placeholder="e.g., my-image">
+            </div>
+            <div class="form-group">
+                <label>Asset Type *</label>
+                <select id="assetTypeInput" style="width: 100%; padding: 8px; background: #3c3c3c; border: 1px solid #3e3e42; color: #cccccc; border-radius: 4px;">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                    <option value="model">3D Model (GLTF)</option>
+                    <option value="plane">Plane</option>
+                    <option value="box">Box</option>
+                    <option value="circle">Circle</option>
+                    <option value="text">Text</option>
+                    <option value="button">Button</option>
+                    <option value="panel">Panel (Info Card)</option>
+                </select>
+            </div>
+            <div class="form-group" id="textOptions" style="display:none;">
+                <label>Text Content</label>
+                <input type="text" id="assetTextContent" placeholder="Enter text">
+            </div>
+            <div class="form-group" id="buttonOptions" style="display:none;">
+                <label>Button Label</label>
+                <input type="text" id="assetButtonLabel" placeholder="e.g., CONNECT ON LINKEDIN">
+                <label style="margin-top: 8px;">Button URL</label>
+                <input type="text" id="assetButtonUrl" placeholder="https://www.linkedin.com/in/...">
+                <label style="margin-top: 8px;">Text Color</label>
+                <input type="color" id="assetButtonTextColor" value="#ffffff" style="width: 100%; height: 40px;">
+                <label style="margin-top: 8px;">Text Width</label>
+                <input type="number" id="assetButtonTextWidth" value="1.0" step="0.1" min="0.3" max="3" style="width: 100%; padding: 8px; background: #3c3c3c; border: 1px solid #3e3e42; color: #cccccc; border-radius: 4px;">
+            </div>
+            <div class="form-group" id="panelOptions" style="display:none;">
+                <label>Panel Text (use \n for line breaks)</label>
+                <textarea id="assetPanelText" rows="4" style="width: 100%; padding: 8px; background: #3c3c3c; border: 1px solid #3e3e42; color: #cccccc; border-radius: 4px;">TITLE
+Subtitle
+More Info</textarea>
+                <label style="margin-top: 8px;">Background Color</label>
+                <input type="color" id="assetPanelBgColor" value="#2d3436" style="width: 100%; height: 40px;">
+                <label style="margin-top: 8px;">Text Color</label>
+                <input type="color" id="assetPanelTextColor" value="#ffffff" style="width: 100%; height: 40px;">
+                <label style="margin-top: 8px;">Text Width</label>
+                <input type="number" id="assetPanelTextWidth" value="1.8" step="0.1" min="0.5" max="5" style="width: 100%; padding: 8px; background: #3c3c3c; border: 1px solid #3e3e42; color: #cccccc; border-radius: 4px;">
+            </div>
+            <div class="form-group" id="genericColorOptions" style="display:none;">
+                <label>Color</label>
+                <input type="color" id="assetGenericColor" value="#0077B5" style="width: 100%; height: 40px;">
+            </div>
+            <div class="form-group" id="sourceOptions">
+                <label>Asset Source (URL or path)</label>
+                <input type="text" id="assetSourceInput" placeholder="assets/image.jpg">
+            </div>
+            <div class="form-group" id="fileOptions">
+                <label>Or Upload File</label>
+                <input type="file" id="assetFileInput" accept="image/*,video/*,.glb,.gltf">
+                <small style="color: #858585; display: block; margin-top: 4px;">Supported: Images, Videos, GLTF/GLB models</small>
+            </div>
+            <div class="form-actions">
+                <button onclick="closeAddAssetModal()" class="secondary">Cancel</button>
+                <button onclick="addAsset()">Add Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export HTML Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Export Configuration</div>
+            <div style="margin-bottom: 12px; font-size: 12px; color: #858585;">
+                Configuration exported successfully! You can now:
+            </div>
+            <div style="margin-bottom: 12px; font-size: 12px;">
+                <div>✓ Save the JSON to preserve your setup</div>
+                <div>✓ Copy the index.html code below</div>
+            </div>
+            <textarea id="exportPreview" readonly></textarea>
+            <div class="form-actions">
+                <button class="secondary" onclick="copyToClipboard('exportPreview')">Copy to Clipboard</button>
+                <button onclick="downloadExport()">Download HTML</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Scene constants
+    const CARD_WIDTH = 1.8;   // canonical business card width in scene units
+    const CARD_HEIGHT = 1.0;  // canonical business card height in scene units
+    const GRID_SCALE = 1.5;   // grid is 1.5x the business card size
+
+        // Global state
+        let project = {
+            name: 'New Project',
+            assets: [],
+            frames: ['1', '2']
+        };
+
+    let selectedAsset = null;
+    let activeFrame = '1';
+    let currentView = 'perspective'; // 'perspective' | 'top'
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAssets();
+            initFramesUI();
+            // Scene tap: cycle frames with animation
+            const scene = document.getElementById('previewScene');
+            if (scene) {
+                scene.addEventListener('loaded', () => {
+                    // Initialize cameras and helpers after scene is ready
+                    setView('perspective');
+                    // Ensure orthographic frustum is correct
+                    setTimeout(updateOrthoCamera, 0);
+                    // Build grid and card outline sized to 1.5x business card
+                    setTimeout(updateGridAndOutline, 0);
+                    // No additional handlers needed
+                });
+                scene.addEventListener('click', () => {
+                    if (!project.frames || project.frames.length < 2) return;
+                    const idx = project.frames.indexOf(activeFrame);
+                    const next = project.frames[(idx + 1) % project.frames.length];
+                    animateToFrame(next);
+                    activeFrame = next;
+                    initFramesUI();
+                    // After animation completes, rebuild to include/exclude frame-specific assets
+                    setTimeout(() => updatePreview(), 750);
+                });
+            }
+            // Keep orthographic camera sized to viewport
+            window.addEventListener('resize', () => {
+                updateOrthoCamera();
+            });
+
+            //
+        });
+
+        // File Management
+        function newProject() {
+            if (confirm('Create a new project? Any unsaved changes will be lost.')) {
+                project = {
+                    name: 'New Project',
+                    assets: [],
+                    frames: ['1', '2']
+                };
+                selectedAsset = null;
+                activeFrame = '1';
+                updateFileInfo();
+                renderAssets();
+                updatePreview();
+                initFramesUI();
+            }
+        }
+
+        function loadExample() {
+            fetch('ar-card-config.json')
+                .then(response => response.json())
+                .then(data => {
+                    project = data;
+                    selectedAsset = null;
+                    if (!project.frames) {
+                        const frameSet = new Set(['1']);
+                        (project.assets||[]).forEach(a => {
+                            if (a.states) Object.keys(a.states).forEach(k => frameSet.add(k));
+                        });
+                        project.frames = Array.from(frameSet);
+                    }
+                    // Migrate old frame names to numeric
+                    const frameMap = { 'default': '1', 'normal': '1', 'popup': '2' };
+                    project.frames = [...new Set(project.frames.map(f => frameMap[f] || f))];
+                    (project.assets||[]).forEach(asset => {
+                        if (asset.states) {
+                            const newStates = {};
+                            Object.keys(asset.states).forEach(oldFrame => {
+                                const newFrame = frameMap[oldFrame] || oldFrame;
+                                newStates[newFrame] = asset.states[oldFrame];
+                            });
+                            asset.states = newStates;
+                        }
+                    });
+                    migrateLegacyInfoPanels();
+                    activeFrame = project.frames[0] || '1';
+                    updateFileInfo();
+                    renderAssets();
+                    updatePreview();
+                    initFramesUI();
+                    showMessage('Example config loaded!');
+                })
+                .catch(err => alert('Error loading example: ' + err.message));
+        }
+
+        function initFramesUI() {
+            const sel = document.getElementById('frameSelect');
+            if (!sel) return;
+            sel.innerHTML = '';
+            (project.frames || ['default']).forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f;
+                opt.textContent = f;
+                if (f === activeFrame) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function setActiveFrame(frameName) {
+            activeFrame = frameName;
+            updatePreview();
+        }
+
+        function addFramePrompt() {
+            // Suggest next numeric frame name
+            const maxNum = Math.max(0, ...project.frames.map(f => parseInt(f) || 0));
+            const nextNum = maxNum + 1;
+            const name = prompt('New frame name:', String(nextNum));
+            if (!name) return;
+            if (!project.frames) project.frames = [];
+            if (!project.frames.includes(name)) project.frames.push(name);
+            // Do not auto-add all assets to the new frame; user can toggle visibility per asset
+            activeFrame = name;
+            initFramesUI();
+            updatePreview();
+        }
+
+        function saveFrame() {
+            const name = activeFrame;
+            (project.assets || []).forEach(a => {
+                if (!a.states || !a.states[name]) return; // only save visible assets in this frame
+                a.states[name].position = { ...a.position };
+                a.states[name].rotation = { ...a.rotation };
+                a.states[name].scale = { ...a.scale };
+            });
+            showMessage(`Saved frame: ${name}`);
+        }
+
+        function openProject() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        project = JSON.parse(event.target.result);
+                        if (!project.frames) {
+                            const frameSet = new Set(['default']);
+                            (project.assets||[]).forEach(a => {
+                                if (a.states) Object.keys(a.states).forEach(k => frameSet.add(k));
+                            });
+                            project.frames = Array.from(frameSet);
+                        }
+                        migrateLegacyInfoPanels();
+                        activeFrame = project.frames[0] || 'default';
+                        updateFileInfo();
+                        renderAssets();
+                        updatePreview();
+                        initFramesUI();
+                    } catch (err) {
+                        alert('Error loading file: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function saveProject() {
+            const data = JSON.stringify(project, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project.name.replace(/\s+/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('Project saved!');
+        }
+
+        // Asset Management
+        function showAddAssetModal() {
+            document.getElementById('addAssetModal').classList.add('active');
+        }
+
+        function closeAddAssetModal() {
+            document.getElementById('addAssetModal').classList.remove('active');
+            document.getElementById('assetNameInput').value = '';
+            document.getElementById('assetSourceInput').value = '';
+            document.getElementById('assetFileInput').value = '';
+        }
+
+        function addAsset() {
+            const name = document.getElementById('assetNameInput').value.trim();
+            const type = document.getElementById('assetTypeInput').value;
+            const sourceInput = document.getElementById('assetSourceInput').value.trim();
+            const fileInput = document.getElementById('assetFileInput');
+            const textContent = document.getElementById('assetTextContent')?.value || '';
+            const buttonLabel = document.getElementById('assetButtonLabel')?.value || '';
+            const buttonUrl = document.getElementById('assetButtonUrl')?.value || '';
+            const buttonTextColor = document.getElementById('assetButtonTextColor')?.value || '#ffffff';
+            const buttonTextWidth = parseFloat(document.getElementById('assetButtonTextWidth')?.value) || 1.0;
+            const panelText = document.getElementById('assetPanelText')?.value || '';
+            const panelBgColor = document.getElementById('assetPanelBgColor')?.value || '#2d3436';
+            const panelTextColor = document.getElementById('assetPanelTextColor')?.value || '#ffffff';
+            const panelTextWidth = parseFloat(document.getElementById('assetPanelTextWidth')?.value) || 1.8;
+            const genericColor = document.getElementById('assetGenericColor')?.value || '';
+            
+            let source = sourceInput;            if (!name) {
+                alert('Asset name is required');
+                return;
+            }
+
+            const needsSource = (type === 'image' || type === 'video' || type === 'model');
+
+            if (needsSource) {
+                // Handle file upload
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        source = e.target.result; // Data URL
+                        createAsset(name, type, source, textContent, buttonLabel, buttonUrl, buttonTextColor, buttonTextWidth, panelText, panelBgColor, panelTextColor, panelTextWidth, genericColor);
+                    };
+                    reader.readAsDataURL(file);
+                    return;
+                }
+                if (!source) {
+                    alert('Please provide a source URL or upload a file');
+                    return;
+                }
+            } else {
+                // Native primitives don't need a source
+                source = '';
+            }
+
+            createAsset(name, type, source, textContent, buttonLabel, buttonUrl, buttonTextColor, buttonTextWidth, panelText, panelBgColor, panelTextColor, panelTextWidth, genericColor);
+        }
+
+    function createAsset(name, type, source, textContent, buttonLabel, buttonUrl, buttonTextColor, buttonTextWidth, panelText, panelBgColor, panelTextColor, panelTextWidth, genericColor) {
+            const asset = {
+                id: 'asset-' + Date.now(),
+                name: name,
+                type: type,
+                source: source,
+                position: { x: 0, y: 0.2, z: 0 },
+                rotation: { x: -90, y: 0, z: 0 },
+                scale: { x: 1, y: 1, z: 1 },
+                meta: {}
+            };
+            if (type === 'text') {
+                asset.meta.text = textContent || name;
+                asset.meta.color = '#ffffff';
+                asset.meta.width = 1.6;
+            }
+            if (type === 'button') {
+                asset.meta.label = buttonLabel || 'BUTTON';
+                asset.meta.url = buttonUrl || '#';
+                // fixed styling to mirror index overlay button
+                asset.position = { x: 0, y: 0.05, z: 0 };
+                asset.rotation = { x: -90, y: 0, z: 0 };
+            }
+            if (type === 'panel') {
+                asset.meta.panelText = panelText || 'TITLE\nSubtitle\n---\nMore Info';
+                asset.meta.bgColor = panelBgColor || '#2d3436';
+                asset.meta.textColor = panelTextColor || '#ffffff';
+                asset.meta.textWidth = panelTextWidth || 1.8;
+                asset.position = { x: 0, y: 0.05, z: 0 };
+                asset.rotation = { x: -90, y: 0, z: 0 };
+            }
+            if (!['panel','button','text'].includes(type) && genericColor) {
+                asset.meta.color = genericColor;
+            }
+            // No default opacity meta; all assets are opaque by default
+            
+            asset.states = asset.states || {};
+            asset.states[activeFrame] = {
+                position: {...asset.position},
+                rotation: {...asset.rotation},
+                scale: {...asset.scale}
+            };
+
+            project.assets.push(asset);
+            closeAddAssetModal();
+            renderAssets();
+            updatePreview();
+        }
+
+        function removeAsset(id) {
+            if (confirm('Remove this asset?')) {
+                project.assets = project.assets.filter(a => a.id !== id);
+                selectedAsset = null;
+                renderAssets();
+                updatePreview();
+            }
+        }
+
+        function updateAsset(id, key, subkey, value) {
+            const asset = project.assets.find(a => a.id === id);
+            if (asset) {
+                if (subkey) {
+                    asset[key][subkey] = parseFloat(value);
+                } else {
+                    asset[key] = value;
+                }
+                // If frames exist, mirror change into active frame state
+                asset.states = asset.states || {};
+                const st = asset.states[activeFrame] || { position: {...asset.position}, rotation: {...asset.rotation}, scale: {...asset.scale} };
+                if (subkey && st[key]) {
+                    st[key][subkey] = parseFloat(value);
+                } else if (st[key]) {
+                    st[key] = asset[key];
+                }
+                asset.states[activeFrame] = st;
+                updatePreview();
+                if (key === 'type') {
+                    renderAssets();
+                }
+            }
+        }
+
+        function updateAssetMeta(id, metaKey, value) {
+            const asset = project.assets.find(a => a.id === id);
+            if (asset) {
+                asset.meta = asset.meta || {};
+                asset.meta[metaKey] = value;
+                updatePreview();
+            }
+        }
+
+        function updateAssetFrameMeta(id, frameName, metaKey, value) {
+            const asset = project.assets.find(a => a.id === id);
+            if (!asset) return;
+            asset.states = asset.states || {};
+            const st = asset.states[frameName] || {
+                position: { ...asset.position },
+                rotation: { ...asset.rotation },
+                scale: { ...asset.scale }
+            };
+            st.meta = st.meta || {};
+            if (value === '') {
+                delete st.meta[metaKey];
+            } else {
+                st.meta[metaKey] = value;
+            }
+            asset.states[frameName] = st;
+            updatePreview();
+            renderAssets();
+        }
+
+        function renderAssets() {
+            const container = document.getElementById('assetsList');
+            container.innerHTML = '';
+
+            project.assets.forEach(asset => {
+                const item = document.createElement('div');
+                item.className = 'asset-item';
+                item.innerHTML = `
+                    <div class="asset-header" onclick="toggleAsset('${asset.id}')">
+                        <div class="asset-name">${asset.name}</div>
+                        <div class="asset-toggle" id="toggle-${asset.id}">▶</div>
+                    </div>
+                    <div class="asset-content" id="content-${asset.id}">
+                        <div class="coord-group">
+                            <div style="margin-bottom: 4px; color: #858585; font-size: 11px; font-weight: bold;">Visible in Frames:</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                                ${project.frames.map(frame => `
+                                    <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:#ccc;">
+                                        <input type="checkbox" ${asset.states && asset.states[frame] ? 'checked' : ''}
+                                            onchange="updateAssetVisibility('${asset.id}', this.checked, '${frame}')">
+                                        Frame ${frame}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Name</div>
+                            <input type="text" class="coord-input" value="${asset.name}" 
+                                onchange="updateAsset('${asset.id}', 'name', null, this.value)">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Type</div>
+                            <select class="coord-input" onchange="updateAsset('${asset.id}', 'type', null, this.value)">
+                                <option value="image" ${asset.type === 'image' ? 'selected' : ''}>Image</option>
+                                <option value="video" ${asset.type === 'video' ? 'selected' : ''}>Video</option>
+                                <option value="model" ${asset.type === 'model' ? 'selected' : ''}>3D Model</option>
+                                <option value="plane" ${asset.type === 'plane' ? 'selected' : ''}>Plane</option>
+                                <option value="box" ${asset.type === 'box' ? 'selected' : ''}>Box</option>
+                                <option value="circle" ${asset.type === 'circle' ? 'selected' : ''}>Circle</option>
+                                <option value="text" ${asset.type === 'text' ? 'selected' : ''}>Text</option>
+                                <option value="button" ${asset.type === 'button' ? 'selected' : ''}>Button</option>
+                                <option value="panel" ${asset.type === 'panel' ? 'selected' : ''}>Panel</option>
+                            </select>
+                        </div>
+                        ${ (['image','video','model'].includes(asset.type)) ? `
+                        <div class="coord-group"> 
+                            <div class="coord-label">Source</div>
+                            <input type="text" class="coord-input" value="${asset.source}" 
+                                onchange="updateAsset('${asset.id}', 'source', null, this.value)">
+                        </div>` : '' }
+                        ${ asset.type === 'button' ? `
+                            <div class="coord-group"> 
+                                <div class="coord-label">Button Label</div>
+                                <input type="text" class="coord-input" value="${asset.meta?.label || 'BUTTON'}" 
+                                    onchange="updateAssetMeta('${asset.id}', 'label', this.value)">
+                            </div>
+                            <div class="coord-group"> 
+                                <div class="coord-label">Button URL</div>
+                                <input type="text" class="coord-input" value="${asset.meta?.url || '#'}" 
+                                    onchange="updateAssetMeta('${asset.id}', 'url', this.value)">
+                            </div>` : '' }
+                        ${ asset.type === 'panel' ? `
+                        <div class="coord-group"> 
+                            <div class="coord-label">Panel Text (use \\n for line breaks)</div>
+                            <textarea class="coord-input" rows="4" 
+                                onchange="updateAssetMeta('${asset.id}', 'panelText', this.value)">${asset.meta?.panelText || ''}</textarea>
+                        </div>
+                        <div class="coord-group"> 
+                            <div class="coord-label">Background Color</div>
+                            <input type="color" class="coord-input" value="${asset.meta?.bgColor || '#2d3436'}" 
+                                onchange="updateAssetMeta('${asset.id}', 'bgColor', this.value)">
+                        </div>
+                        <div class="coord-group"> 
+                            <div class="coord-label">Text Color</div>
+                            <input type="color" class="coord-input" value="${asset.meta?.textColor || '#ffffff'}" 
+                                onchange="updateAssetMeta('${asset.id}', 'textColor', this.value)">
+                        </div>
+                        <div class="coord-group"> 
+                            <div class="coord-label">Text Width</div>
+                            <input type="number" class="coord-input" value="${asset.meta?.textWidth || 1.8}" step="0.1"
+                                onchange="updateAssetMeta('${asset.id}', 'textWidth', this.value)">
+                        </div>` : '' }
+                        
+                        ${ (asset.type !== 'panel' && asset.type !== 'button') ? `
+                        <div class="coord-group"> 
+                            <div class="coord-label">Color</div>
+                            <input type="color" class="coord-input" value="${asset.meta?.color || (asset.type==='button' ? '#0077B5' : '#ffffff')}" 
+                                onchange="updateAssetMeta('${asset.id}', 'color', this.value)">
+                        </div>` : '' }
+                        ${ asset.type === 'model' ? `
+                        <div style="margin-top: 8px; margin-bottom: 8px; color: #858585; font-size: 11px; font-weight: bold;">Model Animation:</div>
+                        <div class="coord-group">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#ccc;">
+                                <input type="checkbox" ${asset.meta?.animRotateEnable ? 'checked' : ''}
+                                    onchange="updateAssetMeta('${asset.id}', 'animRotateEnable', this.checked)">
+                                Rotate (loop)
+                            </label>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Axis</div>
+                            <select class="coord-input" onchange="updateAssetMeta('${asset.id}', 'animRotateAxis', this.value)">
+                                <option value="x" ${(asset.meta?.animRotateAxis||'y')==='x'?'selected':''}>X</option>
+                                <option value="y" ${(asset.meta?.animRotateAxis||'y')==='y'?'selected':''}>Y</option>
+                                <option value="z" ${(asset.meta?.animRotateAxis||'y')==='z'?'selected':''}>Z</option>
+                            </select>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Speed</div>
+                            <input type="number" class="coord-input" min="1" max="360" step="1" value="${asset.meta?.animRotateSpeed || 30}"
+                                onchange="updateAssetMeta('${asset.id}', 'animRotateSpeed', parseFloat(this.value))">
+                            <div class="coord-value">deg/s</div>
+                        </div>` : '' }
+                        ${ asset.type !== 'button' ? `
+                        <div style="margin-top: 8px; margin-bottom: 8px; color: #858585; font-size: 11px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">X</div>
+                            <input type="range" class="coord-input" min="-5" max="5" step="0.1" value="${asset.position.x}"
+                                oninput="updateAsset('${asset.id}', 'position', 'x', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(2);">
+                            <div class="coord-value">${asset.position.x.toFixed(2)}</div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Y</div>
+                            <input type="range" class="coord-input" min="-5" max="5" step="0.1" value="${asset.position.y}"
+                                oninput="updateAsset('${asset.id}', 'position', 'y', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(2);">
+                            <div class="coord-value">${asset.position.y.toFixed(2)}</div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Z</div>
+                            <input type="range" class="coord-input" min="-5" max="5" step="0.1" value="${asset.position.z}"
+                                oninput="updateAsset('${asset.id}', 'position', 'z', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(2);">
+                            <div class="coord-value">${asset.position.z.toFixed(2)}</div>
+                        </div>
+                        <div style="margin-top: 8px; margin-bottom: 8px; color: #858585; font-size: 11px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">X</div>
+                            <input type="range" class="coord-input" min="-360" max="360" step="5" value="${asset.rotation.x}"
+                                oninput="updateAsset('${asset.id}', 'rotation', 'x', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(0);">
+                            <div class="coord-value">${asset.rotation.x.toFixed(0)}°</div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Y</div>
+                            <input type="range" class="coord-input" min="-360" max="360" step="5" value="${asset.rotation.y}"
+                                oninput="updateAsset('${asset.id}', 'rotation', 'y', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(0);">
+                            <div class="coord-value">${asset.rotation.y.toFixed(0)}°</div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Z</div>
+                            <input type="range" class="coord-input" min="-360" max="360" step="5" value="${asset.rotation.z}"
+                                oninput="updateAsset('${asset.id}', 'rotation', 'z', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(0);">
+                            <div class="coord-value">${asset.rotation.z.toFixed(0)}°</div>
+                        </div>
+                        <div style="margin-top: 8px; margin-bottom: 8px; color: #858585; font-size: 11px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">X</div>
+                            <input type="range" class="coord-input" min="0.1" max="3" step="0.1" value="${asset.scale.x}"
+                                oninput="updateAsset('${asset.id}', 'scale', 'x', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(2);">
+                            <div class="coord-value">${asset.scale.x.toFixed(2)}</div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Y</div>
+                            <input type="range" class="coord-input" min="0.1" max="3" step="0.1" value="${asset.scale.y}"
+                                oninput="updateAsset('${asset.id}', 'scale', 'y', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(2);">
+                            <div class="coord-value">${asset.scale.y.toFixed(2)}</div>
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">Z</div>
+                            <input type="range" class="coord-input" min="0.1" max="3" step="0.1" value="${asset.scale.z}"
+                                oninput="updateAsset('${asset.id}', 'scale', 'z', this.value); this.nextElementSibling.textContent = parseFloat(this.value).toFixed(2);">
+                            <div class="coord-value">${asset.scale.z.toFixed(2)}</div>
+                        </div>` : '' }
+                        <div class="asset-actions">
+                            <button class="danger" onclick="removeAsset('${asset.id}')">Remove</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function toggleAsset(id) {
+            const content = document.getElementById(`content-${id}`);
+            const toggle = document.getElementById(`toggle-${id}`);
+            const header = document.querySelector(`[data-asset-id="${id}"]`)?.parentElement || event.target.closest('.asset-header');
+            
+            content.classList.toggle('expanded');
+            toggle.classList.toggle('expanded');
+            header.classList.toggle('expanded');
+        }
+
+        function updatePreview() {
+            const scene = document.getElementById('previewScene');
+            const container = document.getElementById('assets-container');
+            const assetsEl = document.getElementById('aframe-assets');
+            if (!scene || !container || !assetsEl) return;
+
+            while (container.firstChild) container.removeChild(container.firstChild);
+            assetsEl.querySelectorAll('[data-dynamic="true"]').forEach(el => el.remove());
+
+            (project.assets || []).forEach(asset => {
+                if (!(asset.states && asset.states[activeFrame])) return;
+                const pos = asset.position || { x:0,y:0,z:0 };
+                const rot = asset.rotation || { x:0,y:0,z:0 };
+                const scl = asset.scale || { x:1,y:1,z:1 };
+                const frameState = asset.states[activeFrame] || { position:pos, rotation:rot, scale:scl };
+                const tpos = frameState.position || pos;
+                const trot = frameState.rotation || rot;
+                const tscl = frameState.scale || scl;
+                let el;
+                switch(asset.type){
+                    case 'image': {
+                        el = document.createElement('a-image');
+                        if (asset.source) el.setAttribute('src', asset.source);
+                        // Fully opaque by default
+                        break;
+                    }
+                    case 'video': {
+                        el = document.createElement('a-plane');
+                        const vidId = `vid-${asset.id}`;
+                        const vid = document.createElement('video');
+                        vid.id = vidId;
+                        vid.setAttribute('crossorigin','anonymous');
+                        if (asset.source) vid.src = asset.source;
+                        vid.loop = true; vid.muted = true; vid.autoplay = true; vid.playsInline = true;
+                        vid.dataset.dynamic = 'true';
+                        assetsEl.appendChild(vid);
+                        el.setAttribute('material', `src: #${vidId}; shader: flat; side: double`);
+                        el.setAttribute('width', CARD_WIDTH);
+                        el.setAttribute('height', CARD_HEIGHT);
+                        break;
+                    }
+                    case 'model': {
+                        // Outer wrapper holds base transforms; inner spinner holds model + optional rotation
+                        el = document.createElement('a-entity');
+                        el.classList.add('clickable');
+                        el.setAttribute('gesture-handler', '');
+                        const spinner = document.createElement('a-entity');
+                        if (asset.source) spinner.setAttribute('gltf-model', `url(${asset.source})`);
+                        spinner.setAttribute('animation-mixer', 'loop: repeat');
+                        if (asset.meta?.animRotateEnable) {
+                            const axis = (asset.meta.animRotateAxis || 'y').toLowerCase();
+                            const speed = Math.max(1, parseFloat(asset.meta.animRotateSpeed || 30)); // deg/s
+                            const dur = Math.round((360 / speed) * 1000);
+                            let to = '0 360 0';
+                            if (axis === 'x') to = '360 0 0';
+                            if (axis === 'z') to = '0 0 360';
+                            // Do not set 'from' so it uses current (0 0 0) and loops seamlessly
+                            spinner.setAttribute('animation__rotate', { property: 'rotation', to, dur, loop: true, easing: 'linear' });
+                        }
+                        el.appendChild(spinner);
+                        break;
+                    }
+                    case 'plane': {
+                        el = document.createElement('a-plane');
+                        el.setAttribute('width', CARD_WIDTH);
+                        el.setAttribute('height', CARD_HEIGHT);
+                        if (asset.source) {
+                            el.setAttribute('material', `src: ${asset.source}; shader: flat; side: double`);
+                        } else {
+                            const c = asset.meta?.color || '#999';
+                            el.setAttribute('color', c);
+                        }
+                        break;
+                    }
+                    case 'box': {
+                        el = document.createElement('a-box');
+                        el.setAttribute('depth','0.02');
+                        el.setAttribute('color','#999');
+                        break;
+                    }
+                    case 'circle': {
+                        el = document.createElement('a-circle');
+                        el.setAttribute('radius','0.5');
+                        el.setAttribute('color','#999');
+                        break;
+                    }
+                    case 'text': {
+                        el = document.createElement('a-text');
+                        el.setAttribute('value', asset.meta?.text || asset.name || 'Text');
+                        el.setAttribute('align','center');
+                        el.setAttribute('color', asset.meta?.color || '#ffffff');
+                        el.setAttribute('width', asset.meta?.width || 1.6);
+                        break;
+                    }
+                    case 'panel': {
+                        // Preview panel: simple single text block (export may differ)
+                        el = document.createElement('a-entity');
+                        const panelText = asset.meta?.panelText || 'PANEL\nText Here';
+                        const bgColor = asset.meta?.bgColor || '#2d3436';
+                        const textColor = asset.meta?.textColor || '#ffffff';
+                        const textWidth = asset.meta?.textWidth || 1.8;
+                        // Background wrapper: scales independently from text
+                        const bgWrap = document.createElement('a-entity');
+                        bgWrap.classList.add('panel-bg');
+                        const bg = document.createElement('a-plane');
+                        bg.setAttribute('width', '2.2');
+                        bg.setAttribute('height', '1.8');
+                        bg.setAttribute('color', bgColor);
+                        bg.setAttribute('material', `side: double; opacity: 1`);
+                        bg.setAttribute('position','0 0 0');
+                        bgWrap.appendChild(bg);
+                        // Apply initial scale to background only (text stays constant size)
+                        bgWrap.setAttribute('scale', `${tscl.x||1} ${tscl.y||1} ${tscl.z||1}`);
+                        el.appendChild(bgWrap);
+                        const txt = document.createElement('a-text');
+                        txt.setAttribute('value', panelText);
+                        txt.setAttribute('align','center');
+                        txt.setAttribute('color', textColor);
+                        txt.setAttribute('width', textWidth);
+                        txt.setAttribute('wrap-count', '40');
+                        txt.setAttribute('position','0 0.02 0.01');
+                        el.appendChild(txt);
+                        break;
+                    }
+                    default: {
+                        el = document.createElement('a-entity');
+                    }
+                }
+
+                el.setAttribute('data-asset-id', asset.id);
+                el.setAttribute('position', `${tpos.x} ${tpos.y} ${tpos.z}`);
+                el.setAttribute('rotation', `${trot.x||0} ${trot.y||0} ${trot.z||0}`);
+                // Apply scale to all non-panel assets here; panel background scales independently
+                if (asset.type !== 'panel') {
+                    el.setAttribute('scale', `${tscl.x||1} ${tscl.y||1} ${tscl.z||1}`);
+                }
+                container.appendChild(el);
+            });
+        }
+
+        function updateAssetVisibility(id, visible, frameName) {
+            const asset = project.assets.find(a => a.id === id);
+            if (!asset) return;
+            asset.states = asset.states || {};
+            const targetFrame = frameName || activeFrame;
+            if (visible) {
+                asset.states[targetFrame] = {
+                    position: { ...asset.position },
+                    rotation: { ...asset.rotation },
+                    scale: { ...asset.scale },
+                    meta: asset.meta ? { ...asset.meta } : undefined
+                };
+            } else {
+                if (asset.states[targetFrame]) delete asset.states[targetFrame];
+            }
+            updatePreview();
+            renderAssets();
+        }
+
+        function animateToFrame(frameName) {
+            const container = document.getElementById('assets-container');
+            if (!container) return;
+            (project.assets || []).forEach(asset => {
+                const el = container.querySelector(`[data-asset-id="${asset.id}"]`);
+                if (!el) return;
+                const st = asset.states && asset.states[frameName];
+                const pos = st?.position || asset.position || {x:0,y:0,z:0};
+                const rot = st?.rotation || asset.rotation || {x:0,y:0,z:0};
+                const scl = st?.scale || asset.scale || {x:1,y:1,z:1};
+                el.setAttribute('animation__pos', { property: 'position', to: `${pos.x} ${pos.y} ${pos.z}`, dur: 700, easing: 'easeInOutQuad' });
+                el.setAttribute('animation__rot', { property: 'rotation', to: `${rot.x||0} ${rot.y||0} ${rot.z||0}`, dur: 700, easing: 'easeInOutQuad' });
+                if (asset.type === 'panel') {
+                    const bgWrap = el.querySelector('.panel-bg');
+                    if (bgWrap) {
+                        bgWrap.setAttribute('animation__scl', { property: 'scale', to: `${scl.x||1} ${scl.y||1} ${scl.z||1}`, dur: 700, easing: 'easeInOutQuad' });
+                    }
+                } else {
+                    el.setAttribute('animation__scl', { property: 'scale', to: `${scl.x||1} ${scl.y||1} ${scl.z||1}`, dur: 700, easing: 'easeInOutQuad' });
+                }
+            });
+        }
+
+        function setView(mode) {
+            const perspEl = document.getElementById('editorCamera');
+            const topEl = document.getElementById('topCamera');
+            const scene = document.getElementById('previewScene');
+            if (!perspEl || !topEl || !scene) return;
+
+            const orbit = perspEl.components && perspEl.components['orbit-controls'];
+            const controls = orbit && orbit.controls ? orbit.controls : null;
+
+            if (mode === 'top') {
+                // Deactivate perspective cam and activate orthographic top cam
+                perspEl.setAttribute('camera', 'active', false);
+                topEl.setAttribute('camera', 'active', true);
+                // Freeze orbit controls to avoid input conflicts
+                if (controls) controls.enabled = false;
+                // Ensure correct ortho frustum and alignment
+                updateOrthoCamera();
+                currentView = 'top';
+            } else {
+                // Return to perspective orbit camera
+                topEl.setAttribute('camera', 'active', false);
+                perspEl.setAttribute('camera', 'active', true);
+                if (controls) {
+                    controls.enabled = true;
+                    controls.minPolarAngle = 0.0;
+                    controls.maxPolarAngle = Math.PI - 0.00001;
+                    controls.object.position.set(2, 2, 3);
+                    controls.target.set(0, 0, 0);
+                    controls.update();
+                } else {
+                    const camObj = perspEl.getObject3D('camera');
+                    if (camObj) {
+                        camObj.position.set(2, 2, 3);
+                        if (camObj.lookAt) camObj.lookAt(0, 0, 0);
+                    }
+                }
+                currentView = 'perspective';
+            }
+        }
+
+        function updateOrthoCamera() {
+            const scene = document.getElementById('previewScene');
+            const camEl = document.getElementById('topCamera');
+            if (!scene || !camEl) return;
+            const camObj = camEl.getObject3D('camera');
+            if (!camObj || camObj.type !== 'OrthographicCamera') return;
+
+            // Fit the grid (based on business card size) comfortably in view
+            const canvas = scene.canvas;
+            const width = canvas ? canvas.clientWidth : window.innerWidth;
+            const height = canvas ? canvas.clientHeight : window.innerHeight;
+            const aspect = Math.max(0.0001, width / Math.max(1, height));
+            const gridW = CARD_WIDTH * GRID_SCALE;
+            const gridH = CARD_HEIGHT * GRID_SCALE;
+            const margin = 0.95; // tighter padding so content fills more of the view
+            // Compute half-heights so that the larger axis fits with margin
+            // Determine target world height to fit given aspect
+            let targetHeight = gridH * margin;
+            let targetWidth = gridW * margin;
+            const currentAspect = targetWidth / Math.max(0.0001, targetHeight);
+            if (currentAspect < aspect) {
+                // Not wide enough for viewport; expand width
+                targetWidth = targetHeight * aspect;
+            } else {
+                // Not tall enough; expand height
+                targetHeight = targetWidth / aspect;
+            }
+            const halfHeight = targetHeight / 2;
+            const halfWidth = targetWidth / 2;
+            camObj.left = -halfWidth;
+            camObj.right = halfWidth;
+            camObj.top = halfHeight;
+            camObj.bottom = -halfHeight;
+            camObj.near = 0.01;
+            camObj.far = 100;
+            // Default zoom in a bit so the card and grid appear larger
+            const defaultZoom = 2;
+            camEl.setAttribute('camera', 'zoom', defaultZoom);
+            camObj.zoom = defaultZoom;
+            camObj.updateProjectionMatrix();
+            // Keep perfect overhead orientation (set attributes to avoid being overridden)
+            camEl.setAttribute('position', '0 6 0');
+            camEl.setAttribute('rotation', '-90 0 0');
+        }
+
+        function updateGridAndOutline() {
+            const grid = document.getElementById('gridPlane');
+            const outline = document.getElementById('cardOutline');
+            if (grid) {
+                const gw = CARD_WIDTH * GRID_SCALE;
+                const gh = CARD_HEIGHT * GRID_SCALE;
+                grid.setAttribute('width', gw);
+                grid.setAttribute('height', gh);
+                // Keep a consistent grid density (~20 cells on the long edge)
+                const cells = 20;
+                const repX = Math.max(1, Math.round(cells));
+                const repY = Math.max(1, Math.round(cells * (gh / Math.max(0.0001, gw))));
+                const mat = grid.getAttribute('material') || '';
+                grid.setAttribute('material', `${mat}`.replace(/repeat:\s*[^;]+/, '').trim());
+                grid.setAttribute('material', `src: #gridTex; repeat: ${repX} ${repY}; transparent: true; metalness: 0; roughness: 1`);
+            }
+            if (outline) buildCardOutline(outline, CARD_WIDTH, CARD_HEIGHT);
+        }
+
+        // (Zoom handlers removed in this reverted version)
+
+        function buildCardOutline(container, w, h) {
+            // Clear prior lines
+            while (container.firstChild) container.removeChild(container.firstChild);
+            const y = 0.021; // a hair above grid so it doesn't z-fight
+            const x0 = -w / 2, x1 = w / 2;
+            const z0 = -h / 2, z1 = h / 2;
+            const color = '#ffffff';
+            const opacity = 0.75;
+            const mkLine = (sx, sy, sz, ex, ey, ez) => {
+                const e = document.createElement('a-entity');
+                e.setAttribute('line', `start: ${sx} ${sy} ${sz}; end: ${ex} ${ey} ${ez}; color: ${color}`);
+                e.setAttribute('material', `color: ${color}; opacity: ${opacity}`);
+                return e;
+            };
+            container.appendChild(mkLine(x0, y, z0, x1, y, z0)); // top edge
+            container.appendChild(mkLine(x1, y, z0, x1, y, z1)); // right edge
+            container.appendChild(mkLine(x1, y, z1, x0, y, z1)); // bottom edge
+            container.appendChild(mkLine(x0, y, z1, x0, y, z0)); // left edge
+        }
+
+        function resetView() {
+            setView('perspective');
+        }
+
+        function toggleGrid() {
+            const grid = document.getElementById('gridPlane');
+            const axes = document.getElementById('axes');
+            const outline = document.getElementById('cardOutline');
+            if (grid) {
+                const gv = grid.getAttribute('visible');
+                grid.setAttribute('visible', gv === false ? true : false);
+            }
+            if (axes) {
+                const av = axes.getAttribute('visible');
+                axes.setAttribute('visible', av === false ? true : false);
+            }
+            if (outline) {
+                const ov = outline.getAttribute('visible');
+                outline.setAttribute('visible', ov === false ? true : false);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        // Modal dynamic fields
+        (function setupModalTypeToggle(){
+            const typeSel = document.getElementById('assetTypeInput');
+            const txtOpts = document.getElementById('textOptions');
+            const btnOpts = document.getElementById('buttonOptions');
+            const panelOpts = document.getElementById('panelOptions');
+            const srcOpts = document.getElementById('sourceOptions');
+            const fileOpts = document.getElementById('fileOptions');
+            const genericColorOpts = document.getElementById('genericColorOptions');
+            if (typeSel) {
+                const needsSource = (t) => (t === 'image' || t === 'video' || t === 'model');
+                const sync = () => {
+                    if (txtOpts) txtOpts.style.display = (typeSel.value === 'text') ? 'block' : 'none';
+                    if (btnOpts) btnOpts.style.display = (typeSel.value === 'button') ? 'block' : 'none';
+                    if (panelOpts) panelOpts.style.display = (typeSel.value === 'panel') ? 'block' : 'none';
+                    if (srcOpts) srcOpts.style.display = needsSource(typeSel.value) ? 'block' : 'none';
+                    if (fileOpts) fileOpts.style.display = needsSource(typeSel.value) ? 'block' : 'none';
+                    if (genericColorOpts) genericColorOpts.style.display = (typeSel.value !== 'panel') ? 'block' : 'none';
+                };
+                typeSel.addEventListener('change', sync);
+                sync();
+            }
+        })();
+        // Export Functions
+        function exportConfig() {
+            const data = JSON.stringify(project, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project.name.replace(/\s+/g, '-')}-config.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('Configuration exported!');
+        }
+
+        function generateIndex() {
+            const includeAnims = document.getElementById('exportIncludeAnimations')?.checked !== false;
+            // Build <a-assets> library for videos so we can control playback
+            const videos = (project.assets || []).filter(a => a.type === 'video');
+            const assetsLib = videos.map(v => {
+                const vidId = `vid-${v.id}`;
+                return `                <video id="${vidId}" crossOrigin="anonymous" src="${v.source}" preload="auto" loop playsinline webkit-playsinline muted></video>`;
+            }).join('\n');
+
+            // Build button overlays (HTML, not AR scene elements)
+            const buttons = (project.assets || []).filter(a => a.type === 'button');
+            const buttonOverlays = buttons.map(btn => {
+                const label = btn.meta?.label || 'BUTTON';
+                const url = btn.meta?.url || '#';
+                const framesList = Object.keys(btn.states || {}).join(',');
+                return `        <div id="btn-${btn.id}" class="ar-button" data-frames="${framesList}" data-url="${url}" style="display:none;">${label}</div>`;
+            }).join('\n');
+
+            // Build scene content inside marker
+            const markerContent = (project.assets || []).map(asset => {
+                const pos = asset.position || {x:0,y:0,z:0};
+                const rot = asset.rotation || {x:0,y:0,z:0};
+                const scl = asset.scale || {x:1,y:1,z:1};
+                switch (asset.type) {
+                    case 'image': {
+                        return `                <a-image data-asset-id="${asset.id}"
+                    src="${asset.source}"
+                    position="${pos.x} ${pos.y} ${pos.z}"
+                    rotation="${rot.x} ${rot.y} ${rot.z}"
+                    scale="${scl.x} ${scl.y} ${scl.z}"
+                ></a-image>`;
+                    }
+                    case 'video': {
+                        const vidId = `vid-${asset.id}`;
+                        return `                <a-plane data-asset-id="${asset.id}"
+                    position="${pos.x} ${pos.y} ${pos.z}"
+                    rotation="${rot.x} ${rot.y} ${rot.z}"
+                    width="1.8"
+                    height="1"
+                    material="src: #${vidId}; shader: flat; side: double"
+                ></a-plane>`;
+                    }
+                    case 'model': {
+                        // Outer wrapper holds the edited transforms; inner child holds model + optional spin
+                        let rotateAttr = '';
+                        if (includeAnims && asset.meta && asset.meta.animRotateEnable) {
+                            const axis = String(asset.meta.animRotateAxis || 'y').toLowerCase();
+                            const speed = Math.max(1, parseFloat(asset.meta.animRotateSpeed || 30));
+                            const dur = Math.round((360 / speed) * 1000);
+                            let to = '0 360 0';
+                            if (axis === 'x') to = '360 0 0';
+                            if (axis === 'z') to = '0 0 360';
+                            rotateAttr = ` animation__rotate="property: rotation; to: ${to}; dur: ${dur}; loop: true; easing: linear"`;
+                        }
+                        return `                <a-entity data-asset-id="${asset.id}"
+                    position="${pos.x} ${pos.y} ${pos.z}"
+                    rotation="${rot.x} ${rot.y} ${rot.z}"
+                    scale="${scl.x} ${scl.y} ${scl.z}"
+                    class="clickable" gesture-handler>
+                    <a-entity gltf-model="url(${asset.source})" animation-mixer="loop: repeat"${rotateAttr}></a-entity>
+                </a-entity>`;
+                    }
+                    case 'panel': {
+                        // Export panel to match index.html orientation:
+                        // - Panel wrapper remains neutral (0 0 0)
+                        // - Child plane rotated -90 on X to lie flat on marker
+                        // - Separate text wrapper rotated -90 on X; child a-text lines unrotated
+                        const panelText = asset.meta?.panelText || 'PANEL\\nText Here';
+                        const bgColor = asset.meta?.bgColor || '#2d3436';
+                        const textColor = asset.meta?.textColor || '#ffffff';
+                        const textWidth = asset.meta?.textWidth || 1.8;
+                        const lines = panelText.split('\\n');
+                        const spacing = 0.15; // vertical distance between lines along local Z
+                        const totalHeight = (lines.length - 1) * spacing;
+                        const startZ = (-totalHeight / 2) - 0.10; // centered with slight upward bias
+                        const textYOffset = 0.08; // lift text slightly above plane to avoid z-fighting
+                        const textLines = lines.map((line, i) => {
+                            const lineZ = (startZ + i * spacing).toFixed(4);
+                            // Child text lines remain unrotated because parent text wrapper is rotated -90
+                            return `                    <a-text value=\"${line}\" align=\"center\" color=\"${textColor}\" width=\"${textWidth}\" position=\"0 0.02 ${lineZ}\"></a-text>`;
+                        }).join('\\n');
+                        // Text entity first (order matters) with render-order component to guarantee on-top rendering
+                        const textEntity = `                <a-entity data-asset-id=\"${asset.id}-text\" position=\"${pos.x} ${(pos.y + textYOffset).toFixed(3)} ${pos.z}\" rotation=\"-90 0 0\" scale=\"1 1 1\" render-order=\"999\">\n${textLines}\n                </a-entity>`;
+                        // Panel wrapper: neutral position/rotation; nested background wrapper holds scale
+                        // Swap Y and Z for panel since plane is rotated -90: Y becomes width, Z becomes height
+                        const panelEntity = `                <a-entity data-asset-id=\"${asset.id}\" position=\"${pos.x} ${pos.y} ${pos.z}\" rotation=\"0 0 0\" scale=\"1 1 1\">\n                    <a-entity scale=\"${scl.x} ${scl.z} ${scl.y}\">\n                        <a-plane width=\"2.2\" height=\"1.8\" color=\"${bgColor}\" material=\"side: double; opacity: 1\" rotation=\"-90 0 0\" position=\"0 0 0\"></a-plane>\n                    </a-entity>\n                </a-entity>`;
+                        return `${textEntity}\n\n${panelEntity}`;
+                    }
+                    case 'button': {
+                        // Button is now an HTML overlay, not an AR scene element
+                        return '';
+                    }
+                    case 'plane': {
+                        const color = asset.meta?.color || '#999';
+                        return `                <a-plane data-asset-id="${asset.id}" position="${pos.x} ${pos.y} ${pos.z}" rotation="${rot.x} ${rot.y} ${rot.z}" width="1.8" height="1" color="${color}" scale="${scl.x} ${scl.y} ${scl.z}"></a-plane>`;
+                    }
+                    case 'box': {
+                        return `                <a-box data-asset-id="${asset.id}" position="${pos.x} ${pos.y} ${pos.z}" rotation="${rot.x} ${rot.y} ${rot.z}" depth="0.02" color="#999" scale="${scl.x} ${scl.y} ${scl.z}"></a-box>`;
+                    }
+                    case 'circle': {
+                        return `                <a-circle data-asset-id="${asset.id}" position="${pos.x} ${pos.y} ${pos.z}" rotation="${rot.x} ${rot.y} ${rot.z}" radius="0.5" color="#999" scale="${scl.x} ${scl.y} ${scl.z}"></a-circle>`;
+                    }
+                    case 'text': {
+                        const txt = asset.meta?.text || asset.name || 'Text';
+                        const color = asset.meta?.color || '#ffffff';
+                        const width = asset.meta?.width || 1.6;
+                        return `                <a-text data-asset-id="${asset.id}" value="${txt}" align="center" color="${color}" width="${width}" position="${pos.x} ${pos.y} ${pos.z}" rotation="${rot.x} ${rot.y} ${rot.z}" scale="${scl.x} ${scl.y} ${scl.z}"></a-text>`;
+                    }
+                    default: return '';
+                }
+            }).filter(Boolean).join('\n\n');
+
+            const htmlContent = `<!doctype html>
+<html>
+    <head>
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">
+        <title>${project.name}</title>
+        
+        <script src=\"https://aframe.io/releases/1.0.4/aframe.min.js\"><\/script>
+        <script src=\"https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js\"><\/script>
+        <script src=\"https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js\"><\/script>
+        <script src=\"https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js\"><\/script>
+        <script src=\"https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js\"><\/script>
+        
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { margin: 0; overflow: hidden; background: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+            #status { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.9); font-size: 12px; padding: 10px 20px; background: rgba(0,0,0,0.85); border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); z-index: 1000; pointer-events: none; backdrop-filter: blur(10px); }
+            #tap-instruction { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; font-weight: bold; padding: 12px 24px; background: rgba(0, 0, 0, 0.9); border-radius: 25px; border: 2px solid #fff; z-index: 1001; animation: pulse 2s infinite; backdrop-filter: blur(10px); }
+            #tap-instruction.hidden { display: none; }
+            .ar-button { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; font-weight: bold; padding: 12px 24px; background: rgba(0, 119, 181, 0.95); border-radius: 25px; border: 2px solid #fff; z-index: 1002; cursor: pointer; backdrop-filter: blur(10px); }
+            .ar-button:hover { background: rgba(0, 119, 181, 1); transform: translateX(-50%) scale(1.05); }
+            @keyframes pulse { 0%,100%{ transform: translateX(-50%) scale(1);} 50%{ transform: translateX(-50%) scale(1.06);} }
+        </style>
+    </head>
+
+    <body>
+        <div id=\"status\">Point camera at marker<\/div>
+        <div id=\"tap-instruction\">TAP FOR INFO<\/div>
+${buttonOverlays}
+        <a-scene
+            vr-mode-ui=\"enabled: false\"
+            loading-screen=\"enabled: false\"
+            arjs=\"sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;\"
+            renderer=\"logarithmicDepthBuffer: true; antialias: true; alpha: true;\"
+            embedded
+            gesture-detector
+        >
+            <a-assets>
+${assetsLib}
+            </a-assets>
+
+            <a-marker
+                type=\"pattern\"
+                preset=\"custom\"
+                url=\"assets/marker.patt\"
+                raycaster=\"objects: .clickable\"
+                emitevents=\"true\"
+                cursor=\"fuse: false; rayOrigin: mouse\"
+                smooth=\"true\"
+                smoothCount=\"10\"
+                smoothTolerance=\"0.01\"
+                smoothThreshold=\"5\"
+            >
+                <!-- Lighting -->
+                <a-entity light=\"type: ambient; color: #fff; intensity: 0.9\"></a-entity>
+                <a-entity light=\"type: directional; color: #fff; intensity: 1\" position=\"2 4 2\"></a-entity>
+
+${markerContent}
+
+            </a-marker>
+
+            <a-entity camera>
+                <a-entity cursor=\"fuse: false; rayOrigin: mouse\" raycaster=\"objects: .clickable; far: 20\"></a-entity>
+            </a-entity>
+        </a-scene>
+    
+        <script>
+            // Force render order for specific entities (e.g., panel text)
+            if (window.AFRAME) {
+                AFRAME.registerComponent('render-order', {
+                    schema: {default: 0},
+                    init: function() {
+                        const apply = () => {
+                            this.el.object3D.traverse((node) => {
+                                if (node.isMesh) {
+                                    node.renderOrder = this.data;
+                                    if (node.material) {
+                                        node.material.depthTest = false;
+                                        node.material.depthWrite = false;
+                                        node.material.needsUpdate = true;
+                                    }
+                                }
+                            });
+                        };
+                        this.el.addEventListener('object3dset', apply);
+                        this.el.addEventListener('loaded', apply);
+                        setTimeout(apply, 100);
+                        setTimeout(apply, 500);
+                    }
+                });
+            }
+
+            (function(){
+                const marker = document.querySelector('a-marker');
+                const status = document.getElementById('status');
+                const tapInstruction = document.getElementById('tap-instruction');
+                const videos = Array.from(document.querySelectorAll('a-assets > video'));
+
+                let markerVisible = false;
+                marker.addEventListener('markerFound', () => {
+                    markerVisible = true;
+                    status.textContent = 'AR Active';
+                    setTimeout(() => { videos.forEach(v => { try { v.play(); } catch(e) {} }); }, 500);
+                    // Initialize to the first frame's state so visibility/positions match Frame 1
+                    setTimeout(() => { try { animateTo(activeFrame); tapInstruction.textContent = 'TAP FOR INFO'; } catch(e) {} }, 100);
+                });
+                marker.addEventListener('markerLost', () => {
+                    markerVisible = false;
+                    status.textContent = 'Point camera at marker';
+                });
+
+                // Choreography based on differences between first two frames
+                const frames = ${JSON.stringify(project.frames || ['1'])};
+                const assets = ${JSON.stringify(project.assets || [])};
+                let activeFrame = frames[0] || '1';
+
+                function animateTo(frame){
+                    (assets||[]).forEach(a => {
+                        const st = (a.states && a.states[frame]) || null;
+                        if (a.type === 'button') {
+                            // Handle button overlay visibility
+                            const btn = document.getElementById('btn-' + a.id);
+                            if (btn) btn.style.display = st ? 'block' : 'none';
+                            return;
+                        }
+                        const el = document.querySelector('[data-asset-id="' + a.id + '"]');
+                        if (!el) return;
+                        if (!st) {
+                            // No state in this frame: hide element
+                            el.setAttribute('visible', false);
+                            // Hide associated panel text if this is a panel
+                            if (a.type === 'panel') {
+                                const textEl = document.querySelector('[data-asset-id="' + a.id + '-text"]');
+                                if (textEl) textEl.setAttribute('visible', false);
+                            }
+                            return;
+                        }
+                        const pos = st.position || a.position || {x:0,y:0,z:0};
+                        const rot = st.rotation || a.rotation || {x:0,y:0,z:0};
+                        const scl = st.scale || a.scale || {x:1,y:1,z:1};
+                        el.setAttribute('visible', true);
+                        el.setAttribute('animation__pos', { property: 'position', to: (pos.x + ' ' + pos.y + ' ' + pos.z), dur: 500, easing: 'easeOutQuad' });
+                        if (a.type === 'panel') {
+                            // Match index.html: keep wrapper neutral, rotate child plane/text -90
+                            el.setAttribute('rotation', '0 0 0');
+                            // Sync separate text entity with panel visibility and position
+                            const textEl = document.querySelector('[data-asset-id="' + a.id + '-text"]');
+                            if (textEl) {
+                                const textYOffset = 0.08;
+                                textEl.setAttribute('visible', true);
+                                textEl.setAttribute('rotation', '-90 0 0');
+                                textEl.setAttribute('animation__pos', { property: 'position', to: (pos.x + ' ' + (pos.y + textYOffset) + ' ' + pos.z), dur: 500, easing: 'easeOutQuad' });
+                            }
+                        } else {
+                            el.setAttribute('animation__rot', { property: 'rotation', to: ((rot.x||0) + ' ' + (rot.y||0) + ' ' + (rot.z||0)), dur: 500, easing: 'easeOutQuad' });
+                        }
+                        // Scale animation applies to all
+                        el.setAttribute('animation__scl', { property: 'scale', to: ((scl.x||1) + ' ' + (scl.y||1) + ' ' + (scl.z||1)), dur: 500, easing: 'easeOutQuad' });
+                    });
+                    // Safety: after loop, ensure panel text mirrors panel visibility
+                    (assets||[]).filter(a => a.type === 'panel').forEach(a => {
+                        const panelEl = document.querySelector('[data-asset-id="' + a.id + '"]');
+                        const textEl = document.querySelector('[data-asset-id="' + a.id + '-text"]');
+                        if (panelEl && textEl) {
+                            const vis = panelEl.getAttribute('visible');
+                            textEl.setAttribute('visible', vis !== false);
+                        }
+                    });
+                }
+
+                function toggleFrame(){
+                    if (!frames || frames.length < 2) return;
+                    const idx = frames.indexOf(activeFrame);
+                    const next = frames[(idx + 1) % frames.length];
+                    animateTo(next);
+                    activeFrame = next;
+                    // Mirror index.html UX text changes
+                    if (activeFrame === (frames[0] || '1')) {
+                        tapInstruction.textContent = 'TAP FOR INFO';
+                    } else {
+                        tapInstruction.textContent = 'TAP TO CLOSE';
+                    }
+                }
+
+                // Tap/click anywhere to toggle frames (but not on buttons or clickables)
+                document.addEventListener('touchstart', (e) => { 
+                    if (markerVisible && !e.target.closest('.ar-button') && !e.target.closest('.clickable')) toggleFrame(); 
+                });
+                document.addEventListener('click', (e) => { 
+                    if (markerVisible && !e.target.closest('.ar-button') && !e.target.closest('.clickable')) toggleFrame(); 
+                });
+
+                // Button click handlers for HTML overlays
+                document.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.ar-button');
+                    if (btn) {
+                        const u = btn.getAttribute('data-url');
+                        if (u && u !== '#') window.open(u, '_blank');
+                        e.stopPropagation();
+                    }
+                }, true);
+            })();
+        <\/script>
+    
+    <\/body>
+<\/html>`;
+
+            document.getElementById('exportPreview').value = htmlContent;
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            showMessage('Copied to clipboard!');
+        }
+
+        function downloadExport() {
+            const content = document.getElementById('exportPreview').value;
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project.name.replace(/\s+/g, '-')}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('HTML downloaded!');
+        }
+
+        function updateFileInfo() {
+            document.getElementById('fileInfo').textContent = `${project.name} (${project.assets.length} assets)`;
+        }
+
+        function showMessage(msg) {
+            const msgEl = document.getElementById('successMessage');
+            msgEl.textContent = msg;
+            msgEl.classList.add('show');
+            setTimeout(() => msgEl.classList.remove('show'), 3000);
+        }
+
+        // Migration: convert legacy plane named 'info-panel' into panel asset
+        function migrateLegacyInfoPanels() {
+            (project.assets || []).forEach(asset => {
+                if (asset && asset.type === 'plane' && asset.name && asset.name.toLowerCase() === 'info-panel') {
+                    asset.type = 'panel';
+                    asset.meta = asset.meta || {};
+                    asset.meta.panelText = asset.meta.panelText || 'TITLE\nSubtitle\n---\nMore Info';
+                    asset.meta.bgColor = asset.meta.bgColor || '#2d3436';
+                    asset.meta.textColor = asset.meta.textColor || '#ffffff';
+                    asset.meta.textWidth = asset.meta.textWidth || 1.8;
+                    asset.meta.opacity = asset.meta.opacity !== undefined ? asset.meta.opacity : 0.9;
+                    // Ensure each state carries meta copy for overrides consistency
+                    if (asset.states) {
+                        Object.keys(asset.states).forEach(f => {
+                            const st = asset.states[f];
+                            if (st) {
+                                st.meta = st.meta || { ...asset.meta };
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // Close modals on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize
+        updateFileInfo();
+        updatePreview();
+    </script>
+</body>
+</html>

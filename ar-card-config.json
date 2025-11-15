@@ -1,0 +1,143 @@
+{
+  "name": "Simon's AR Business Card",
+  "assets": [
+    {
+      "id": "asset-video",
+      "name": "video-plane",
+      "type": "video",
+      "source": "assets/PFIC_AR.mp4",
+      "position": { "x": 0, "y": 0.2, "z": 0 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "states": {
+        "normal": { "position": { "x": 0, "y": 0.2, "z": 0 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } },
+        "popup": { "position": { "x": -1.5, "y": 0.25, "z": -1.2 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } }
+      }
+    },
+    {
+      "id": "asset-simon-photo",
+      "name": "simon-photo",
+      "type": "image",
+      "source": "assets/simon.png",
+      "position": { "x": 1.3, "y": 0.2, "z": -0.1 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 0.70, "y": 0.70, "z": 0.70 },
+      "states": {
+        "normal": { "position": { "x": 1.3, "y": 0.2, "z": -0.1 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 0.70, "y": 0.70, "z": 0.70 } },
+        "popup": { "position": { "x": 1.45, "y": 0.25, "z": -1.2 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 0.70, "y": 0.70, "z": 0.70 } }
+      }
+    },
+    {
+      "id": "asset-parker-logo",
+      "name": "parker-logo",
+      "type": "image",
+      "source": "assets/parker-logo.jpg",
+      "position": { "x": -0.42, "y": 0.2, "z": -0.62 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 0.75, "y": 0.25, "z": 0.25 },
+      "states": {
+        "normal": { "position": { "x": -0.42, "y": 0.2, "z": -0.62 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 0.75, "y": 0.25, "z": 0.25 } },
+        "popup": { "position": { "x": -0.25, "y": 0.23, "z": -1.2 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 0.75, "y": 0.25, "z": 0.25 } }
+      }
+    },
+    {
+      "id": "asset-parker-2",
+      "name": "parker-2",
+      "type": "image",
+      "source": "assets/parker_2.jpg",
+      "position": { "x": -0.3, "y": 0.2, "z": 0.75 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 0.5, "z": 0.5 },
+      "states": {
+        "normal": { "position": { "x": -0.3, "y": 0.2, "z": 0.75 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 0.5, "z": 0.5 } },
+        "popup": { "position": { "x": -1.45, "y": 0.24, "z": 1.2 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 0.5, "z": 0.5 } }
+      }
+    },
+    {
+      "id": "asset-pfic-name",
+      "name": "pfic-name",
+      "type": "image",
+      "source": "assets/pfic-name.png",
+      "position": { "x": 1, "y": 0.2, "z": -0.60 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 2, "y": 0.25, "z": 0.25 },
+      "states": {
+        "normal": { "position": { "x": 1, "y": 0.2, "z": -0.60 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 2, "y": 0.25, "z": 0.25 } },
+        "popup": { "position": { "x": 0.4, "y": 0.24, "z": -1.2 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 2, "y": 0.25, "z": 0.25 } }
+      }
+    },
+    {
+      "id": "asset-simon-name",
+      "name": "simon-name",
+      "type": "image",
+      "source": "assets/simon-name.png",
+      "position": { "x": 1.32, "y": 0.2, "z": 0.35 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 0.75, "y": 0.18, "z": 0.18 },
+      "states": {
+        "normal": { "position": { "x": 1.32, "y": 0.2, "z": 0.35 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 0.75, "y": 0.18, "z": 0.18 } },
+        "popup": { "position": { "x": 1.45, "y": 0.2, "z": -0.85 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 0.75, "y": 0.18, "z": 0.18 } }
+      }
+    },
+    {
+      "id": "asset-spinneret",
+      "name": "spinneret-stress",
+      "type": "model",
+      "source": "assets/spinneret-stress.glb",
+      "position": { "x": 1.3, "y": 0, "z": 0.9 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 0.25, "y": 0.25, "z": 0.25 },
+      "states": {
+        "normal": { "position": { "x": 1.3, "y": 0, "z": 0.9 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 0.25, "y": 0.25, "z": 0.25 } },
+        "popup": { "position": { "x": 1.1, "y": 0.4, "z": 1.15 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 0.25, "y": 0.25, "z": 0.25 } }
+      }
+    },
+    {
+      "id": "asset-filter",
+      "name": "Parker_filter_2",
+      "type": "model",
+      "source": "assets/Parker_filter_2.glb",
+      "position": { "x": 0.6, "y": 0, "z": 0.75 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 0.85, "y": 0.85, "z": 0.85 },
+      "states": {
+        "normal": { "position": { "x": 0.6, "y": 0, "z": 0.75 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 0.85, "y": 0.85, "z": 0.85 } },
+        "popup": { "position": { "x": 0, "y": 0.35, "z": 1.3 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 0.85, "y": 0.85, "z": 0.85 } }
+      }
+    },
+    {
+      "id": "asset-panel",
+      "name": "info-panel",
+      "type": "plane",
+      "source": "assets/PFIC_SITE.JPG",
+      "position": { "x": 0, "y": 0.25, "z": 0 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "states": {
+        "popup": { "position": { "x": 0, "y": 0.25, "z": 0 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } }
+      }
+    },
+    {
+      "id": "asset-linkedin-button",
+      "name": "linkedin-button",
+      "type": "button",
+      "position": { "x": 0, "y": 0.2, "z": -0.65 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "meta": {
+        "label": "CONNECT ON LINKEDIN",
+        "url": "https://www.linkedin.com/in/simonpadron",
+        "color": "#0077B5",
+        "textColor": "#ffffff",
+        "textWidth": 1.0,
+        "opacity": 0.9
+      },
+      "states": {
+        "1": { "position": { "x": 0, "y": 0.2, "z": -0.65 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } },
+        "normal": { "position": { "x": 0, "y": 0.2, "z": -0.65 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } },
+        "2": { "position": { "x": 0, "y": 0.2, "z": -0.65 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } },
+        "popup": { "position": { "x": 0, "y": 0.2, "z": -0.65 }, "rotation": { "x": -90, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } }
+      }
+    }
+  ]
+}

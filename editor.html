@@ -1,0 +1,1582 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AR Card Editor - Fixed</title>
+        
+        <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+        
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: #1a1a1a;
+                color: #fff;
+                overflow: hidden;
+            }
+            
+            #container {
+                display: flex;
+                height: 100vh;
+            }
+            
+            #scene-view {
+                flex: 1;
+                position: relative;
+                background: #0a0a0a;
+                min-width: 500px;
+                overflow: hidden;
+            }
+            
+            #controls {
+                width: 400px;
+                min-width: 400px;
+                background: #2a2a2a;
+                overflow-y: auto;
+                padding: 20px;
+                border-left: 2px solid #444;
+                display: block !important; /* Force visible */
+                visibility: visible !important; /* Force visible */
+                z-index: 10 !important;
+                position: relative !important;
+                flex-shrink: 0;
+            }
+            
+            a-scene {
+                display: block !important;
+                width: 100% !important;
+                height: 100% !important;
+                position: relative !important;
+                z-index: 1 !important;
+            }
+            
+            #scene-view {
+                position: relative !important;
+                z-index: 1 !important;
+            }
+            
+            #linkedin-button-overlay {
+                position: absolute;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #0077B5;
+                color: #fff;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                display: none;
+                z-index: 2000;
+                transition: background 0.3s;
+            }
+            
+            #linkedin-button-overlay:hover {
+                background: #005885;
+            }
+            
+            #linkedin-button-overlay.visible {
+                display: block;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 10px;
+                color: #4CAF50;
+                text-align: center;
+            }
+            
+            .subtitle {
+                text-align: center;
+                font-size: 12px;
+                color: #888;
+                margin-bottom: 20px;
+            }
+            
+            .element-section {
+                background: #333;
+                padding: 15px;
+                margin-bottom: 12px;
+                border-radius: 8px;
+                border: 1px solid #444;
+            }
+            
+            .element-title {
+                font-size: 13px;
+                font-weight: bold;
+                color: #fff;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #555;
+            }
+            
+            .control-content {
+                display: block !important; /* Always show controls */
+            }
+            
+            .coord-group {
+                margin-bottom: 10px;
+            }
+            
+            .coord-label {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 4px;
+                font-size: 11px;
+                color: #aaa;
+            }
+            
+            .coord-value {
+                color: #4CAF50;
+                font-weight: bold;
+                font-family: monospace;
+                font-size: 12px;
+            }
+            
+            input[type="range"] {
+                width: 100%;
+                height: 6px;
+                background: #555;
+                outline: none;
+                border-radius: 3px;
+            }
+            
+            input[type="range"]::-webkit-slider-thumb {
+                width: 16px;
+                height: 16px;
+                background: #4CAF50;
+                cursor: pointer;
+                border-radius: 50%;
+            }
+            
+            button {
+                width: 100%;
+                padding: 12px;
+                margin-top: 8px;
+                background: #4CAF50;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: bold;
+                transition: background 0.3s;
+            }
+            
+            button:hover {
+                background: #45a049;
+            }
+            
+            button.secondary {
+                background: #2196F3;
+            }
+            
+            button.secondary:hover {
+                background: #0b7dda;
+            }
+            
+            button.danger {
+                background: #f44336;
+            }
+            
+            button.danger:hover {
+                background: #da190b;
+            }
+            
+            #view-controls {
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(0,0,0,0.8);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #444;
+                z-index: 1000;
+            }
+            
+            #view-controls button {
+                width: auto;
+                padding: 8px 16px;
+                margin: 4px;
+                font-size: 11px;
+            }
+            
+            #info-overlay {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                background: rgba(0,0,0,0.9);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #4CAF50;
+                max-width: 300px;
+                z-index: 1000;
+            }
+            
+            #info-overlay h3 {
+                color: #4CAF50;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+            
+            #info-overlay p {
+                font-size: 11px;
+                line-height: 1.5;
+                color: #ccc;
+                margin-bottom: 8px;
+            }
+            
+            .coord-system {
+                font-size: 10px;
+                color: #888;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #444;
+            }
+            
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: #1a1a1a;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: #555;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="container">
+            <div id="scene-view">
+                <div id="info-overlay">
+                    <h3>📐 Coordinate System</h3>
+                    <p><strong style="color:#f44">X-axis (Red)</strong>: Left (-) to Right (+)</p>
+                    <p><strong style="color:#4f4">Y-axis (Green)</strong>: Down (-) to Up (+)</p>
+                    <p><strong style="color:#44f">Z-axis (Blue)</strong>: Top (-) to Bottom (+)</p>
+                    <div class="coord-system">
+                        Origin (0,0,0) = Center of card<br>
+                        Grid squares = 0.5 units
+                    </div>
+                </div>
+                
+                <div id="view-controls">
+                    <div style="font-size: 11px; margin-bottom: 8px; color: #aaa;">Camera View:</div>
+                    <button onclick="setView('top')">Top ↓</button>
+                    <button onclick="setView('angle')">Angle ⤢</button>
+                    <button onclick="setView('side')">Side →</button>
+                </div>
+                
+                <button id="linkedin-button-overlay" onclick="window.open('https://www.linkedin.com/in/simonpadron', '_blank')">
+                    🔗 CONNECT ON LINKEDIN
+                </button>
+                
+                <a-scene
+                    background="color: #0a0a0a"
+                    vr-mode-ui="enabled: false"
+                >
+                    <!-- Asset Library -->
+                    <a-assets>
+                        <video id="pfic-video" src="assets/PFIC_AR.mp4" preload="auto" loop muted></video>
+                        <img id="simon-photo-img" src="assets/Simon.JPG">
+                        <img id="parker-logo-img" src="assets/parker-logo.jpg">
+                        <img id="parker2-img" src="assets/parker_2.jpg">
+                        <img id="pfic-name-img" src="assets/pfic-name.png">
+                        <img id="simon-name-img" src="assets/simon-name.png">
+                        <img id="pfic-site-img" src="assets/PFIC_SITE.JPG">
+                    </a-assets>
+                    
+                    <!-- Coordinate Grid -->
+                    <a-entity id="grid-system">
+                        <!-- Ground plane -->
+                        <a-plane 
+                            position="0 0 0" 
+                            rotation="-90 0 0" 
+                            width="4" 
+                            height="4" 
+                            color="#1a1a1a"
+                            material="transparent: true; opacity: 0.5"
+                        ></a-plane>
+                        
+                        <!-- Grid lines -->
+                        <a-entity id="grid-lines"></a-entity>
+                        
+                        <!-- X-axis (Red) -->
+                        <a-entity
+                            line="start: -2 0.001 0; end: 2 0.001 0; color: #ff0000"
+                        ></a-entity>
+                        <a-text value="X+" position="2.1 0.1 0" rotation="-90 0 0" color="#ff0000" width="2" align="center"></a-text>
+                        
+                        <!-- Z-axis (Blue) -->
+                        <a-entity
+                            line="start: 0 0.001 -2; end: 0 0.001 2; color: #0000ff"
+                        ></a-entity>
+                        <a-text value="Z+" position="0 0.1 2.1" rotation="-90 0 0" color="#0000ff" width="2" align="center"></a-text>
+                        
+                        <!-- Y-axis (Green) -->
+                        <a-entity
+                            line="start: 0 0 0; end: 0 1 0; color: #00ff00"
+                        ></a-entity>
+                        <a-text value="Y+" position="0.1 1 0" color="#00ff00" width="2"></a-text>
+                        
+                        <!-- Origin marker -->
+                        <a-sphere position="0 0.01 0" radius="0.05" color="#ffff00"></a-sphere>
+                        <a-text value="(0,0,0)" position="0 0.15 0" rotation="-90 0 0" color="#ffff00" width="1.5" align="center"></a-text>
+                    </a-entity>
+                    
+                    <!-- Video Plane -->
+                    <a-plane
+                        id="video-plane"
+                        position="0 0.2 0"
+                        rotation="-90 0 0"
+                        width="1.8"
+                        height="1"
+                        material="src: #pfic-video; side: double"
+                    ></a-plane>
+                    
+                    <!-- Simon Photo -->
+                    <a-plane
+                        id="simon-photo"
+                        position="1.3 0.2 -0.1"
+                        rotation="-90 0 0"
+                        width="0.5"
+                        height="0.5"
+                        material="src: #simon-photo-img; side: double"
+                    ></a-plane>
+                    
+                    <!-- Parker Logo -->
+                    <a-plane
+                        id="parker-logo"
+                        position="-0.42 0.2 -0.62"
+                        rotation="-90 0 0"
+                        width="0.3"
+                        height="0.1"
+                        material="src: #parker-logo-img; side: double"
+                    ></a-plane>
+                    
+                    <!-- Parker 2 -->
+                    <a-plane
+                        id="parker-2"
+                        position="-0.3 0.2 0.75"
+                        rotation="-90 0 0"
+                        width="0.5"
+                        height="0.25"
+                        material="src: #parker2-img; side: double"
+                    ></a-plane>
+                    
+                    <!-- PFIC Name -->
+                    <a-plane
+                        id="pfic-name"
+                        position="1 0.2 -0.6"
+                        rotation="-90 0 0"
+                        width="0.5"
+                        height="0.1"
+                        material="src: #pfic-name-img; side: double"
+                    ></a-plane>
+                    
+                    <!-- Simon Name -->
+                    <a-plane
+                        id="simon-name"
+                        position="1.32 0.2 0.35"
+                        rotation="-90 0 0"
+                        width="0.4"
+                        height="0.1"
+                        material="src: #simon-name-img; side: double"
+                    ></a-plane>
+                    
+                    <!-- 3D Models -->
+                    <a-entity
+                        id="spinneret-stress"
+                        position="1.3 0 0.9"
+                        scale="0.25 0.25 0.25"
+                        rotation="0 0 0"
+                        gltf-model="url(assets/spinneret-stress.glb)"
+                    ></a-entity>
+            
+                    <a-entity
+                        id="Parker_filter_2"
+                        position="0.6 0 0.75"
+                        scale="0.85 0.85 0.85"
+                        rotation="0 0 0"
+                        gltf-model="url(assets/Parker_filter_2.glb)"
+                    ></a-entity>
+                    
+                    <!-- Info Panel -->
+                    <a-entity id="info-panel" position="0 0.25 0" visible="false">
+                        <!-- Background image -->
+                        <a-plane
+                            width="2.2"
+                            height="1.8"
+                            rotation="-90 0 0"
+                            position="0 0 0"
+                            material="src: #pfic-site-img; side: double; opacity: 0.5"
+                        ></a-plane>
+                        
+                        <!-- Dark overlay -->
+                        <a-plane
+                            id="panel-bg"
+                            width="2.2"
+                            height="1.8"
+                            rotation="-90 0 0"
+                            position="0 0.002 0"
+                            color="#2d3436"
+                            material="side: double; opacity: 0.6"
+                        ></a-plane>
+                        
+                        <!-- Unified text content -->
+                        <a-text
+                            id="panel-text"
+                            value="SIMON PADRON&#10;Technology Leader&#10;Parker Hannifin PFIC&#10;---&#10;Ph.D. Student&#10;Texas A&M"
+                            align="center"
+                            color="#fff"
+                            width="1.8"
+                            rotation="-90 0 0"
+                            position="0 0.01 0"
+                        ></a-text>
+                        
+                        <!-- LinkedIn Button -->
+                        <a-box
+                            id="linkedin-button"
+                            width="1.2"
+                            height="0.25"
+                            depth="0.05"
+                            color="#0077B5"
+                            position="0 -0.65 0"
+                            rotation="-90 0 0"
+                            material="side: double; opacity: 0.9"
+                        ></a-box>
+                        
+                        <a-text
+                            id="linkedin-button-text"
+                            value="CONNECT ON LINKEDIN"
+                            align="center"
+                            color="#fff"
+                            width="1.0"
+                            font-size="50"
+                            rotation="-90 0 0"
+                            position="0 -0.65 0.03"
+                        ></a-text>
+                    </a-entity>
+                    
+                    <!-- Camera - Default top view -->
+                    <a-entity 
+                        id="camera" 
+                        camera 
+                        position="0 3 0"
+                        rotation="-90 0 0"
+                        look-controls="enabled: false"
+                    ></a-entity>
+                    
+                    <!-- Lighting -->
+                    <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+                    <a-entity light="type: directional; intensity: 0.5" position="2 4 2"></a-entity>
+                    
+                    <!-- Business Card Dummy (3.5" x 2") -->
+                    <!-- Business card outline -->
+                    <a-entity id="business-card-outline">
+                        <!-- Card border (outer frame) -->
+                        <a-plane
+                            width="2.0"
+                            height="1.3"
+                            depth="0.01"
+                            position="0 0.001 0"
+                            rotation="-90 0 0"
+                            color="#ffffff"
+                            material="side: double; opacity: 0.3"
+                        ></a-plane>
+                        
+                        <!-- Center QR code marker -->
+                        <a-box
+                            width="0.3"
+                            height="0.3"
+                            depth="0.02"
+                            position="0 0.003 0"
+                            rotation="-90 0 0"
+                            color="#000000"
+                            material="side: double; opacity: 0.5"
+                        ></a-box>
+                        
+                        <!-- QR code label text -->
+                        <a-text
+                            value="QR CODE (CENTER)"
+                            align="center"
+                            color="#000000"
+                            width="0.8"
+                            font-size="30"
+                            rotation="-90 0 0"
+                            position="0 0.005 0"
+                        ></a-text>
+                    </a-entity>
+                </a-scene>
+            </div>
+            
+            <div id="controls">
+                <h1>🎛️ AR ELEMENT EDITOR</h1>
+                <div class="subtitle">Adjust element positions</div>
+                
+                <!-- State Toggle -->
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 12px; color: #888; margin-bottom: 8px; text-align: center;">Current State:</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="state-normal" onclick="setState('normal')" style="flex: 1; background: #4CAF50;">
+                            📱 NORMAL
+                        </button>
+                        <button id="state-popup" onclick="setState('popup')" style="flex: 1; background: #555;">
+                            📋 POPUP
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Video Plane -->
+                <div class="element-section">
+                    <div class="element-title">📹 Video Plane</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="video-x-val">0.00</span>
+                            </div>
+                            <input type="range" id="video-x" min="-2" max="2" step="0.05" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="video-y-val">0.20</span>
+                            </div>
+                            <input type="range" id="video-y" min="0" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="video-z-val">0.00</span>
+                            </div>
+                            <input type="range" id="video-z" min="-2" max="2" step="0.05" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="video-rx-val">-90.00</span>
+                            </div>
+                            <input type="range" id="video-rx" min="-360" max="360" step="5" value="-90">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="video-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="video-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="video-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="video-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sx</span>
+                                <span class="coord-value" id="video-sx-val">1.00</span>
+                            </div>
+                            <input type="range" id="video-sx" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sy</span>
+                                <span class="coord-value" id="video-sy-val">1.00</span>
+                            </div>
+                            <input type="range" id="video-sy" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sz</span>
+                                <span class="coord-value" id="video-sz-val">1.00</span>
+                            </div>
+                            <input type="range" id="video-sz" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simon Photo -->
+                <div class="element-section">
+                    <div class="element-title">👤 Simon Photo</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="simon-photo-x-val">1.30</span>
+                            </div>
+                            <input type="range" id="simon-photo-x" min="-2" max="2" step="0.05" value="1.3">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="simon-photo-y-val">0.20</span>
+                            </div>
+                            <input type="range" id="simon-photo-y" min="0" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="simon-photo-z-val">-0.10</span>
+                            </div>
+                            <input type="range" id="simon-photo-z" min="-2" max="2" step="0.05" value="-0.1">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="simon-photo-rx-val">-90.00</span>
+                            </div>
+                            <input type="range" id="simon-photo-rx" min="-360" max="360" step="5" value="-90">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="simon-photo-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="simon-photo-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="simon-photo-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="simon-photo-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sx</span>
+                                <span class="coord-value" id="simon-photo-sx-val">0.70</span>
+                            </div>
+                            <input type="range" id="simon-photo-sx" min="0.1" max="3" step="0.1" value="0.7">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sy</span>
+                                <span class="coord-value" id="simon-photo-sy-val">0.70</span>
+                            </div>
+                            <input type="range" id="simon-photo-sy" min="0.1" max="3" step="0.1" value="0.7">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sz</span>
+                                <span class="coord-value" id="simon-photo-sz-val">0.70</span>
+                            </div>
+                            <input type="range" id="simon-photo-sz" min="0.1" max="3" step="0.1" value="0.7">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Info Panel -->
+                <div class="element-section">
+                    <div class="element-title">📋 Info Panel</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="panel-x-val">0.00</span>
+                            </div>
+                            <input type="range" id="panel-x" min="-2" max="2" step="0.05" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="panel-y-val">0.25</span>
+                            </div>
+                            <input type="range" id="panel-y" min="0" max="1" step="0.01" value="0.25">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="panel-z-val">0.00</span>
+                            </div>
+                            <input type="range" id="panel-z" min="-2" max="2" step="0.05" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="panel-rx-val">0.00</span>
+                            </div>
+                            <input type="range" id="panel-rx" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="panel-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="panel-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="panel-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="panel-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sx</span>
+                                <span class="coord-value" id="panel-sx-val">1.00</span>
+                            </div>
+                            <input type="range" id="panel-sx" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sy</span>
+                                <span class="coord-value" id="panel-sy-val">1.00</span>
+                            </div>
+                            <input type="range" id="panel-sy" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Sz</span>
+                                <span class="coord-value" id="panel-sz-val">1.00</span>
+                            </div>
+                            <input type="range" id="panel-sz" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Panel Text:</div>
+                        <textarea id="panel-text-input" style="width: 100%; height: 80px; padding: 8px; border: 1px solid #555; border-radius: 4px; background: #333; color: #fff; font-size: 11px; font-family: monospace; resize: vertical;">SIMON PADRON
+Technology Leader
+Parker Hannifin PFIC
+---
+Ph.D. Student
+Texas A&M
+---
+linkedin.com/in/simonpadron</textarea>
+                        <button onclick="updatePanelText()" style="width: 100%; margin-top: 8px; padding: 8px; background: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Update Text</button>
+                    </div>
+                </div>
+                
+                <!-- Text Name -->
+                <div class="element-section">
+                    <div class="element-title">📝 "SIMON PADRON"</div>
+                    <div class="control-content">
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="text-name-x-val">0.00</span>
+                            </div>
+                            <input type="range" id="text-name-x" min="-1.5" max="1.5" step="0.05" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y (Height above panel)</span>
+                                <span class="coord-value" id="text-name-y-val">0.01</span>
+                            </div>
+                            <input type="range" id="text-name-y" min="0" max="0.05" step="0.001" value="0.01">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z (Vert on panel)</span>
+                                <span class="coord-value" id="text-name-z-val">-0.70</span>
+                            </div>
+                            <input type="range" id="text-name-z" min="-0.9" max="0.9" step="0.01" value="-0.7">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Text Title -->
+                <div class="element-section">
+                    <div class="element-title">📝 "Technology Leader"</div>
+                    <div class="control-content">
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="text-title-x-val">0.00</span>
+                            </div>
+                            <input type="range" id="text-title-x" min="-1.5" max="1.5" step="0.05" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="text-title-y-val">0.01</span>
+                            </div>
+                            <input type="range" id="text-title-y" min="0" max="0.05" step="0.001" value="0.01">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="text-title-z-val">-0.50</span>
+                            </div>
+                            <input type="range" id="text-title-z" min="-0.9" max="0.9" step="0.01" value="-0.5">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Text Company -->
+                <div class="element-section">
+                    <div class="element-title">📝 "Parker Hannifin"</div>
+                    <div class="control-content">
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="text-company-x-val">0.00</span>
+                            </div>
+                            <input type="range" id="text-company-x" min="-1.5" max="1.5" step="0.05" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="text-company-y-val">0.01</span>
+                            </div>
+                            <input type="range" id="text-company-y" min="0" max="0.05" step="0.001" value="0.01">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="text-company-z-val">-0.35</span>
+                            </div>
+                            <input type="range" id="text-company-z" min="-0.9" max="0.9" step="0.01" value="-0.35">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Parker Logo -->
+                <div class="element-section">
+                    <div class="element-title">🏷️ Parker Logo</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="parker-logo-x-val">-0.40</span>
+                            </div>
+                            <input type="range" id="parker-logo-x" min="-2" max="2" step="0.05" value="-0.4">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="parker-logo-y-val">0.20</span>
+                            </div>
+                            <input type="range" id="parker-logo-y" min="0" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="parker-logo-z-val">-0.60</span>
+                            </div>
+                            <input type="range" id="parker-logo-z" min="-2" max="2" step="0.05" value="-0.6">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="parker-logo-rx-val">-90.00</span>
+                            </div>
+                            <input type="range" id="parker-logo-rx" min="-360" max="360" step="5" value="-90">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="parker-logo-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="parker-logo-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="parker-logo-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="parker-logo-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sx</span><span class="coord-value" id="parker-logo-sx-val">0.75</span></div>
+                            <input type="range" id="parker-logo-sx" min="0.1" max="3" step="0.1" value="0.75">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sy</span><span class="coord-value" id="parker-logo-sy-val">0.25</span></div>
+                            <input type="range" id="parker-logo-sy" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sz</span><span class="coord-value" id="parker-logo-sz-val">0.25</span></div>
+                            <input type="range" id="parker-logo-sz" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Parker 2 -->
+                <div class="element-section">
+                    <div class="element-title">🏷️ Parker 2</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="parker-2-x-val">-0.30</span>
+                            </div>
+                            <input type="range" id="parker-2-x" min="-2" max="2" step="0.05" value="-0.3">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="parker-2-y-val">0.20</span>
+                            </div>
+                            <input type="range" id="parker-2-y" min="0" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="parker-2-z-val">0.75</span>
+                            </div>
+                            <input type="range" id="parker-2-z" min="-2" max="2" step="0.05" value="0.75">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="parker-2-rx-val">-90.00</span>
+                            </div>
+                            <input type="range" id="parker-2-rx" min="-360" max="360" step="5" value="-90">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="parker-2-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="parker-2-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="parker-2-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="parker-2-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sx</span><span class="coord-value" id="parker-2-sx-val">1.00</span></div>
+                            <input type="range" id="parker-2-sx" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sy</span><span class="coord-value" id="parker-2-sy-val">0.50</span></div>
+                            <input type="range" id="parker-2-sy" min="0.1" max="3" step="0.1" value="0.5">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sz</span><span class="coord-value" id="parker-2-sz-val">0.50</span></div>
+                            <input type="range" id="parker-2-sz" min="0.1" max="3" step="0.1" value="0.5">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PFIC Name -->
+                <div class="element-section">
+                    <div class="element-title">📝 PFIC Name</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="pfic-name-x-val">1.00</span>
+                            </div>
+                            <input type="range" id="pfic-name-x" min="-2" max="2" step="0.05" value="1">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="pfic-name-y-val">0.20</span>
+                            </div>
+                            <input type="range" id="pfic-name-y" min="0" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="pfic-name-z-val">-0.60</span>
+                            </div>
+                            <input type="range" id="pfic-name-z" min="-2" max="2" step="0.05" value="-0.6">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="pfic-name-rx-val">-90.00</span>
+                            </div>
+                            <input type="range" id="pfic-name-rx" min="-360" max="360" step="5" value="-90">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="pfic-name-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="pfic-name-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="pfic-name-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="pfic-name-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sx</span><span class="coord-value" id="pfic-name-sx-val">2.00</span></div>
+                            <input type="range" id="pfic-name-sx" min="0.1" max="3" step="0.1" value="2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sy</span><span class="coord-value" id="pfic-name-sy-val">0.25</span></div>
+                            <input type="range" id="pfic-name-sy" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sz</span><span class="coord-value" id="pfic-name-sz-val">0.25</span></div>
+                            <input type="range" id="pfic-name-sz" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simon Name -->
+                <div class="element-section">
+                    <div class="element-title">📝 Simon Name</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="simon-name-x-val">1.30</span>
+                            </div>
+                            <input type="range" id="simon-name-x" min="-2" max="2" step="0.05" value="1.3">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="simon-name-y-val">0.20</span>
+                            </div>
+                            <input type="range" id="simon-name-y" min="0" max="1" step="0.01" value="0.2">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="simon-name-z-val">0.35</span>
+                            </div>
+                            <input type="range" id="simon-name-z" min="-2" max="2" step="0.05" value="0.35">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="simon-name-rx-val">-90.00</span>
+                            </div>
+                            <input type="range" id="simon-name-rx" min="-360" max="360" step="5" value="-90">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="simon-name-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="simon-name-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="simon-name-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="simon-name-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sx</span><span class="coord-value" id="simon-name-sx-val">0.75</span></div>
+                            <input type="range" id="simon-name-sx" min="0.1" max="3" step="0.1" value="0.75">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sy</span><span class="coord-value" id="simon-name-sy-val">0.18</span></div>
+                            <input type="range" id="simon-name-sy" min="0.1" max="3" step="0.1" value="0.18">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sz</span><span class="coord-value" id="simon-name-sz-val">0.18</span></div>
+                            <input type="range" id="simon-name-sz" min="0.1" max="3" step="0.1" value="0.18">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Spinneret Model -->
+                <div class="element-section">
+                    <div class="element-title">🎲 Spinneret Model</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="spinneret-x-val">1.30</span>
+                            </div>
+                            <input type="range" id="spinneret-x" min="-2" max="2" step="0.05" value="1.3">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="spinneret-y-val">0.00</span>
+                            </div>
+                            <input type="range" id="spinneret-y" min="0" max="1" step="0.01" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="spinneret-z-val">0.90</span>
+                            </div>
+                            <input type="range" id="spinneret-z" min="-2" max="2" step="0.05" value="0.9">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="spinneret-rx-val">0.00</span>
+                            </div>
+                            <input type="range" id="spinneret-rx" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="spinneret-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="spinneret-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="spinneret-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="spinneret-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sx</span><span class="coord-value" id="spinneret-sx-val">0.25</span></div>
+                            <input type="range" id="spinneret-sx" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sy</span><span class="coord-value" id="spinneret-sy-val">0.25</span></div>
+                            <input type="range" id="spinneret-sy" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sz</span><span class="coord-value" id="spinneret-sz-val">0.25</span></div>
+                            <input type="range" id="spinneret-sz" min="0.1" max="3" step="0.1" value="0.25">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filter Model -->
+                <div class="element-section">
+                    <div class="element-title">🔧 Filter Model</div>
+                    <div class="control-content">
+                        <div style="font-size: 11px; color: #888; margin-bottom: 8px; font-weight: bold;">Position:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>X</span>
+                                <span class="coord-value" id="filter-x-val">0.60</span>
+                            </div>
+                            <input type="range" id="filter-x" min="-2" max="2" step="0.05" value="0.6">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Y</span>
+                                <span class="coord-value" id="filter-y-val">0.15</span>
+                            </div>
+                            <input type="range" id="filter-y" min="0" max="1" step="0.01" value="0.15">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Z</span>
+                                <span class="coord-value" id="filter-z-val">0.95</span>
+                            </div>
+                            <input type="range" id="filter-z" min="-2" max="2" step="0.05" value="0.95">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Rotation:</div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rx</span>
+                                <span class="coord-value" id="filter-rx-val">-80.00</span>
+                            </div>
+                            <input type="range" id="filter-rx" min="-360" max="360" step="5" value="-80">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Ry</span>
+                                <span class="coord-value" id="filter-ry-val">0.00</span>
+                            </div>
+                            <input type="range" id="filter-ry" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label">
+                                <span>Rz</span>
+                                <span class="coord-value" id="filter-rz-val">0.00</span>
+                            </div>
+                            <input type="range" id="filter-rz" min="-360" max="360" step="5" value="0">
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 10px; margin-bottom: 8px; font-weight: bold;">Scale:</div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sx</span><span class="coord-value" id="filter-sx-val">0.85</span></div>
+                            <input type="range" id="filter-sx" min="0.1" max="3" step="0.1" value="0.85">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sy</span><span class="coord-value" id="filter-sy-val">0.85</span></div>
+                            <input type="range" id="filter-sy" min="0.1" max="3" step="0.1" value="0.85">
+                        </div>
+                        <div class="coord-group">
+                            <div class="coord-label"><span>Sz</span><span class="coord-value" id="filter-sz-val">0.85</span></div>
+                            <input type="range" id="filter-sz" min="0.1" max="3" step="0.1" value="0.85">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px; margin-top: 20px;">
+                    <div style="font-size: 12px; color: #888; margin-bottom: 8px; text-align: center;">Preview:</div>
+                    <button id="show-popup-btn" onclick="togglePopupPreview()" style="width: 100%; background: #FF9800; padding: 12px; margin-bottom: 8px; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer;">
+                        👁️ SHOW POPUP ANIMATION
+                    </button>
+                </div>
+                
+                <button onclick="copyAllCoordinates()">📋 COPY COORDINATES</button>
+                <button class="secondary" onclick="togglePanel()">👁️ TOGGLE PANEL</button>
+            </div>
+        </div>
+    
+        <script>
+            console.log('Script starting...');
+            
+            // State management
+            let currentState = 'normal';
+            
+            const positions = {
+                normal: {
+                    'video': {x: 0, y: 0.2, z: 0, rx: -90, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1},
+                    'simon-photo': {x: 1.3, y: 0.2, z: -0.1, rx: -90, ry: 0, rz: 0, sx: 0.70, sy: 0.70, sz: 0.70},
+                    'parker-logo': {x: -0.42, y: 0.2, z: -0.62, rx: -90, ry: 0, rz: 0, sx: 0.75, sy: 0.25, sz: 0.25},
+                    'parker-2': {x: -0.3, y: 0.2, z: 0.75, rx: -90, ry: 0, rz: 0, sx: 1, sy: 0.5, sz: 0.5},
+                    'pfic-name': {x: 1, y: 0.2, z: -0.60, rx: -90, ry: 0, rz: 0, sx: 2, sy: 0.25, sz: 0.25},
+                    'simon-name': {x: 1.32, y: 0.2, z: 0.35, rx: -90, ry: 0, rz: 0, sx: 0.75, sy: 0.18, sz: 0.18},
+                    'spinneret': {x: 1.3, y: 0, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.25, sy: 0.25, sz: 0.25},
+                    'filter': {x: 0.6, y: 0, z: 0.75, rx: 0, ry: 0, rz: 0, sx: 0.85, sy: 0.85, sz: 0.85},
+                    'panel': {x: 0, y: 0.25, z: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1}
+                },
+                popup: {
+                    'video': {x: -1.5, y: 0.25, z: -1.2, rx: -90, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1},
+                    'simon-photo': {x: 1.45, y: 0.25, z: -1.2, rx: -90, ry: 0, rz: 0, sx: 0.70, sy: 0.70, sz: 0.70},
+                    'parker-logo': {x: -0.25, y: 0.23, z: -1.2, rx: -90, ry: 0, rz: 0, sx: 0.75, sy: 0.25, sz: 0.25},
+                    'parker-2': {x: -1.45, y: 0.24, z: 1.2, rx: -90, ry: 0, rz: 0, sx: 1, sy: 0.5, sz: 0.5},
+                    'pfic-name': {x: 0.4, y: 0.24, z: -1.2, rx: -90, ry: 0, rz: 0, sx: 2, sy: 0.25, sz: 0.25},
+                    'simon-name': {x: 1.45, y: 0.2, z: -0.85, rx: -90, ry: 0, rz: 0, sx: 0.75, sy: 0.18, sz: 0.18},
+                    'spinneret': {x: 1.1, y: 0.4, z: 1.15, rx: 0, ry: 0, rz: 0, sx: 0.25, sy: 0.25, sz: 0.25},
+                    'filter': {x: 0, y: 0.35, z: 1.3, rx: 0, ry: 0, rz: 0, sx: 0.85, sy: 0.85, sz: 0.85},
+                    'panel': {x: 0, y: 0.25, z: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1}
+                }
+            };
+            
+            const elements = {
+                'video': 'video-plane',
+                'simon-photo': 'simon-photo',
+                'parker-logo': 'parker-logo',
+                'parker-2': 'parker-2',
+                'pfic-name': 'pfic-name',
+                'simon-name': 'simon-name',
+                'spinneret': 'spinneret-stress',
+                'filter': 'Parker_filter_2',
+                'panel': 'info-panel'
+            };
+            
+            function setState(state) {
+                currentState = state;
+                
+                document.getElementById('state-normal').style.background = 
+                    state === 'normal' ? '#4CAF50' : '#555';
+                document.getElementById('state-popup').style.background = 
+                    state === 'popup' ? '#4CAF50' : '#555';
+                
+                Object.keys(positions[state]).forEach(key => {
+                    const pos = positions[state][key];
+                    const elementId = elements[key];
+                    
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                        element.setAttribute('rotation', `${pos.rx || 0} ${pos.ry || 0} ${pos.rz || 0}`);
+                    }
+                    
+                    ['x', 'y', 'z', 'rx', 'ry', 'rz'].forEach(axis => {
+                        const slider = document.getElementById(`${key}-${axis}`);
+                        const valueDisplay = document.getElementById(`${key}-${axis}-val`);
+                        
+                        if (slider && valueDisplay) {
+                            slider.value = pos[axis];
+                            valueDisplay.textContent = pos[axis].toFixed(2);
+                        }
+                    });
+                });
+            }
+            
+            function saveCurrentState() {
+                // The positions object is already updated in real-time by the slider event listeners
+                // No need to read from DOM - just ensure all values are properly formatted
+                Object.keys(positions[currentState]).forEach(key => {
+                    if (positions[currentState][key]) {
+                        const pos = positions[currentState][key];
+                        positions[currentState][key] = {
+                            x: parseFloat(pos.x.toFixed(2)),
+                            y: parseFloat(pos.y.toFixed(2)),
+                            z: parseFloat(pos.z.toFixed(2)),
+                            rx: parseFloat((pos.rx || 0).toFixed(2)),
+                            ry: parseFloat((pos.ry || 0).toFixed(2)),
+                            rz: parseFloat((pos.rz || 0).toFixed(2))
+                        };
+                    }
+                });
+            }
+            
+            // Create grid lines
+            window.addEventListener('load', function() {
+                console.log('Creating grid...');
+                const gridContainer = document.querySelector('#grid-lines');
+                if (gridContainer) {
+                    for (let i = -2; i <= 2; i += 0.5) {
+                        if (i === 0) continue;
+                        
+                        const xLine = document.createElement('a-entity');
+                        xLine.setAttribute('line', {
+                            start: `${i} 0.001 -2`,
+                            end: `${i} 0.001 2`,
+                            color: '#333'
+                        });
+                        gridContainer.appendChild(xLine);
+                        
+                        const zLine = document.createElement('a-entity');
+                        zLine.setAttribute('line', {
+                            start: `-2 0.001 ${i}`,
+                            end: `2 0.001 ${i}`,
+                            color: '#333'
+                        });
+                        gridContainer.appendChild(zLine);
+                    }
+                }
+            });
+            
+            // Initialize controls
+            Object.keys(elements).forEach(key => {
+                ['x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz'].forEach(axis => {
+                    const slider = document.getElementById(`${key}-${axis}`);
+                    const valueDisplay = document.getElementById(`${key}-${axis}-val`);
+                    
+                    if (slider && valueDisplay) {
+                        // Initialize positions object with current slider values
+                        const value = parseFloat(slider.value);
+                        if (!positions[currentState][key]) {
+                            positions[currentState][key] = {x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1};
+                        }
+                        positions[currentState][key][axis] = value;
+                        
+                        slider.addEventListener('input', () => {
+                            const value = parseFloat(slider.value);
+                            valueDisplay.textContent = value.toFixed(2);
+                            updateElementPosition(elements[key], axis, value);
+                            
+                            if (!positions[currentState][key]) {
+                                positions[currentState][key] = {x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1};
+                            }
+                            positions[currentState][key][axis] = value;
+                        });
+                    }
+                });
+            });
+            
+            function updateElementPosition(elementId, axis, value) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                const pos = element.getAttribute('position');
+                const rot = element.getAttribute('rotation');
+                const scl = element.getAttribute('scale');
+                
+                const coords = {
+                    x: pos.x,
+                    y: pos.y,
+                    z: pos.z
+                };
+                
+                const rotation = {
+                    x: rot.x || 0,
+                    y: rot.y || 0,
+                    z: rot.z || 0
+                };
+                
+                const scale = {
+                    x: scl.x || 1,
+                    y: scl.y || 1,
+                    z: scl.z || 1
+                };
+                
+                if (['x', 'y', 'z'].includes(axis)) {
+                    coords[axis] = value;
+                    element.setAttribute('position', `${coords.x} ${coords.y} ${coords.z}`);
+                } else if (['rx', 'ry', 'rz'].includes(axis)) {
+                    const rotAxis = axis.substring(1);
+                    rotation[rotAxis] = value;
+                    element.setAttribute('rotation', `${rotation.x} ${rotation.y} ${rotation.z}`);
+                } else if (['sx', 'sy', 'sz'].includes(axis)) {
+                    const scaleAxis = axis.substring(1);
+                    scale[scaleAxis] = value;
+                    element.setAttribute('scale', `${scale.x} ${scale.y} ${scale.z}`);
+                }
+            }
+            
+            function setView(view) {
+                const camera = document.getElementById('camera');
+                
+                switch(view) {
+                    case 'top':
+                        camera.setAttribute('position', '0 3 0');
+                        camera.setAttribute('rotation', '-90 0 0');
+                        break;
+                    case 'angle':
+                        camera.setAttribute('position', '2 2.5 2');
+                        camera.setAttribute('rotation', '-45 45 0');
+                        break;
+                    case 'side':
+                        camera.setAttribute('position', '3 0.5 0');
+                        camera.setAttribute('rotation', '0 90 0');
+                        break;
+                }
+            }
+            
+            function togglePanel() {
+                const panel = document.getElementById('info-panel');
+                const visible = panel.getAttribute('visible');
+                panel.setAttribute('visible', visible === 'false' ? 'true' : 'false');
+            }
+            
+            function copyAllCoordinates() {
+                saveCurrentState();
+                
+                let output = '=== AR ELEMENT COORDINATES ===\n\n';
+                
+                output += 'NORMAL STATE:\n';
+                Object.keys(positions.normal).forEach(key => {
+                    const pos = positions.normal[key];
+                    output += `${key}: position="${pos.x.toFixed(2)} ${pos.y.toFixed(2)} ${pos.z.toFixed(2)}" rotation="${pos.rx.toFixed(2)} ${pos.ry.toFixed(2)} ${pos.rz.toFixed(2)}"\n`;
+                });
+                
+                output += '\nPOPUP STATE:\n';
+                Object.keys(positions.popup).forEach(key => {
+                    const pos = positions.popup[key];
+                    output += `${key}: position="${pos.x.toFixed(2)} ${pos.y.toFixed(2)} ${pos.z.toFixed(2)}" rotation="${pos.rx.toFixed(2)} ${pos.ry.toFixed(2)} ${pos.rz.toFixed(2)}"\n`;
+                });
+                
+                navigator.clipboard.writeText(output).then(() => {
+                    alert('✅ Coordinates copied!');
+                }).catch(() => {
+                    prompt('Copy this:', output);
+                });
+            }
+            
+            let isAnimatingPopup = false;
+            
+            function togglePopupPreview() {
+                if (isAnimatingPopup) return; // Prevent overlapping animations
+                isAnimatingPopup = true;
+                
+                const btn = document.getElementById('show-popup-btn');
+                const popupPositions = positions.popup;
+                const normalPositions = positions.normal;
+                const duration = 1000; // 1 second animation
+                const startTime = Date.now();
+                const infoPanel = document.getElementById('info-panel');
+                
+                // If currently showing normal, animate to popup
+                const isGoingToPopup = currentState === 'normal';
+                const targetPositions = isGoingToPopup ? popupPositions : normalPositions;
+                const startPositions = isGoingToPopup ? normalPositions : popupPositions;
+                
+                btn.textContent = isGoingToPopup ? '⏳ ANIMATING TO POPUP...' : '⏳ ANIMATING TO NORMAL...';
+                btn.style.background = '#FFC107';
+                
+                        // Show info panel when going to popup
+                if (isGoingToPopup) {
+                    infoPanel.setAttribute('visible', 'true');
+                    document.getElementById('linkedin-button-overlay').classList.add('visible');
+                }                function animate() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function (ease-in-out)
+                    const easeProgress = progress < 0.5 
+                        ? 2 * progress * progress 
+                        : -1 + (4 - 2 * progress) * progress;
+                    
+                    // Update all elements
+                    Object.keys(elements).forEach(key => {
+                        const startPos = startPositions[key];
+                        const targetPos = targetPositions[key];
+                        const elementId = elements[key];
+                        const element = document.getElementById(elementId);
+                        
+                        if (element && startPos && targetPos) {
+                            const x = startPos.x + (targetPos.x - startPos.x) * easeProgress;
+                            const y = startPos.y + (targetPos.y - startPos.y) * easeProgress;
+                            const z = startPos.z + (targetPos.z - startPos.z) * easeProgress;
+                            const rx = (startPos.rx || 0) + ((targetPos.rx || 0) - (startPos.rx || 0)) * easeProgress;
+                            const ry = (startPos.ry || 0) + ((targetPos.ry || 0) - (startPos.ry || 0)) * easeProgress;
+                            const rz = (startPos.rz || 0) + ((targetPos.rz || 0) - (startPos.rz || 0)) * easeProgress;
+                            
+                            element.setAttribute('position', `${x} ${y} ${z}`);
+                            element.setAttribute('rotation', `${rx} ${ry} ${rz}`);
+                        }
+                    });
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Animation complete
+                        btn.textContent = isGoingToPopup ? '👁️ SHOW NORMAL VIEW' : '👁️ SHOW POPUP ANIMATION';
+                        btn.style.background = isGoingToPopup ? '#2196F3' : '#FF9800';
+                        const newState = isGoingToPopup ? 'popup' : 'normal';
+                        
+                        // Restore all positions and rotations to exact state values
+                        setState(newState);
+                        
+                        // Hide info panel when returning to normal
+                        if (!isGoingToPopup) {
+                            const infoPanel = document.getElementById('info-panel');
+                            infoPanel.setAttribute('visible', 'false');
+                            document.getElementById('linkedin-button-overlay').classList.remove('visible');
+                        }
+                        
+                        isAnimatingPopup = false;
+                    }
+                }
+                
+                animate();
+            }
+            
+            function updatePanelText() {
+                const textInput = document.getElementById('panel-text-input');
+                const panelText = document.getElementById('panel-text');
+                if (textInput && panelText) {
+                    // Replace newlines with &#10; for A-Frame text
+                    const text = textInput.value;
+                    panelText.setAttribute('value', text);
+                    console.log('Panel text updated:', text);
+                }
+            }
+            
+            console.log('Script loaded successfully!');
+        </script>
+            console.log('Script loaded successfully!');
+        </script>
+    
+    </body>
+</html>
